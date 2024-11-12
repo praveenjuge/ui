@@ -1,0 +1,108 @@
+---
+import "tailwindcss/index.css";
+import {
+  AUTHOR_DRIBBBLE,
+  AUTHOR_EMAIL,
+  AUTHOR_GITHUB,
+  AUTHOR_HANDLE,
+  AUTHOR_INSTAGRAM,
+  AUTHOR_MASTODON,
+  AUTHOR_NAME,
+  AUTHOR_TWITTER,
+  AUTHOR_URL,
+  AUTHOR_X,
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+} from "./consts";
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const {
+  title = SITE_TITLE,
+  description = SITE_DESCRIPTION,
+  mosaic,
+} = Astro.props;
+const coverImage = mosaic
+  ? `https://mosaicimg.com/use?url=${canonicalURL}`
+  : new URL("/opengraph-image.jpg", Astro.url);
+---
+
+<html
+  lang="en"
+  class="text-gray-950 antialiased [font-feature-settings:'ss02','ss03','ss09'] [touch-action:manipulation] [&_img]:bg-gray-100 [scroll-behavior:smooth]"
+>
+  <head>
+    <!-- Main Metadata -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+
+    <!-- Primary Meta Tags -->
+    <title>{title} | {SITE_TITLE}</title>
+    <meta name="title" content={title + " | " + SITE_TITLE} />
+    <meta name="description" content={description} />
+
+    <!-- Other Metadata -->
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={AUTHOR_NAME + "'s Designs"}
+      href={new URL("design/rss.xml", Astro.site)}
+    />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={AUTHOR_NAME + "'s Blog"}
+      href={new URL("blog/rss.xml", Astro.site)}
+    />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="application-name" content={SITE_TITLE} />
+    <link rel="author" href={AUTHOR_URL} />
+    <meta name="author" content={AUTHOR_NAME} />
+    <meta name="keywords" content="praveen,praveenjuge,juge" />
+    <meta name="referrer" content="same-origin" />
+    <meta name="theme-color" content="#e5e7eb" />
+    <meta name="creator" content={AUTHOR_NAME} />
+    <meta name="publisher" content={AUTHOR_NAME} />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="category" content="UI Designer" />
+    <meta name="me" content={AUTHOR_MASTODON} />
+    <meta name="me" content={AUTHOR_TWITTER} />
+    <meta name="me" content={AUTHOR_X} />
+    <meta name="me" content={AUTHOR_GITHUB} />
+    <meta name="me" content={AUTHOR_INSTAGRAM} />
+    <meta name="me" content={AUTHOR_DRIBBBLE} />
+    <meta name="me" content={AUTHOR_EMAIL} />
+    <meta name="me" content={AUTHOR_URL} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content={title + " | " + SITE_TITLE} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content={SITE_TITLE} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="2400" />
+    <meta property="og:image:height" content="1350" />
+    <meta property="og:image" content={coverImage} />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter -->
+    <meta property="twitter:title" content={title + " | " + SITE_TITLE} />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={AUTHOR_HANDLE} />
+    <meta name="twitter:creator" content={AUTHOR_HANDLE} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image:type" content="image/jpeg" />
+    <meta property="twitter:image:width" content="2400" />
+    <meta property="twitter:image:height" content="1350" />
+    <meta property="twitter:image" content={coverImage} />
+    <meta property="twitter:url" content={canonicalURL} />
+  </head>
+  <body>
+    <main id="main"><slot /></main>
+  </body>
+</html>
