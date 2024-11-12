@@ -1,6 +1,6 @@
 export const SITE_TITLE = "UI Tips";
 export const SITE_DESCRIPTION =
-  "Tips and tricks for UI design and development.";
+  "Writing down some design tricks I know so that I won’t forget them.";
 export const SITE_COLOR = "#e5e7eb";
 
 export const AUTHOR_NAME = "Praveen Juge";

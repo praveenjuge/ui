@@ -1,7 +1,42 @@
 ---
+import {
+  AUTHOR_GITHUB,
+  AUTHOR_X,
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+} from "../consts";
 import Layout from "../Layout.astro";
+import { Icon } from "astro-icon/components";
 ---
 
-<Layout title="Home">
-  <h1>Hello World!</h1>
+<Layout title={SITE_TITLE}>
+  <header class="text-center max-w-xs mx-auto space-y-2">
+    <h1 class="text-3xl font-bold tracking-tight">{SITE_TITLE}</h1>
+    <p class="text-lg text-gray-500">{SITE_DESCRIPTION}</p>
+    <div
+      class="flex items-center justify-center gap-2 text-xs font-medium pt-2"
+    >
+      <a
+        href={AUTHOR_X}
+        class="rounded-full px-3 py-1 flex items-center gap-1.5 font-medium border-[0.5px] border-gray-300 shrink-0 select-none"
+      >
+        <Icon name="mynaui:brand-twitter" class="size-5 stroke-2" />
+        Follow for Updates
+      </a>
+      <a
+        href={AUTHOR_GITHUB}
+        class="rounded-full px-3 py-1 flex items-center gap-1.5 font-medium border-[0.5px] border-gray-300 shrink-0 select-none"
+      >
+        <Icon name="mynaui:brand-github" class="size-5 stroke-2" />
+        GitHub
+      </a>
+      <a
+        href="https://ui.praveenjuge.com/rss"
+        class="rounded-full px-3 py-1 flex items-center gap-1.5 font-medium border-[0.5px] border-gray-300 shrink-0 select-none"
+      >
+        <Icon name="mynaui:rss" class="size-5 stroke-2" />
+        RSS
+      </a>
+    </div>
+  </header>
 </Layout>
