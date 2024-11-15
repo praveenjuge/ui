@@ -1,42 +1,39 @@
 ---
-import {
-  AUTHOR_GITHUB,
-  AUTHOR_X,
-  SITE_DESCRIPTION,
-  SITE_TITLE,
-} from "../consts";
+import { AUTHOR_X, SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 import Layout from "../Layout.astro";
 import { Icon } from "astro-icon/components";
+import { getCollection } from "astro:content";
+import SinglePost from "../SinglePost.astro";
+const tips = (await getCollection("tips")).sort(
+  (a, b) => parseInt(b.id) - parseInt(a.id)
+);
 ---
 
-<Layout title={SITE_TITLE}>
+<Layout title="Home">
   <header class="text-center max-w-xs mx-auto space-y-2">
     <h1 class="text-3xl font-bold tracking-tight">{SITE_TITLE}</h1>
-    <p class="text-lg text-gray-500">{SITE_DESCRIPTION}</p>
+    <p class="text-lg text-zinc-500">{SITE_DESCRIPTION}</p>
     <div
-      class="flex items-center justify-center gap-2 text-xs font-medium pt-2"
+      class="flex items-center justify-center gap-1.5 text-xs font-medium pt-2 *:rounded-full *:px-3 *:py-1 *:flex *:items-center *:gap-1.5 *:font-medium *:border-[0.5px] *:border-zinc-300 dark:*:border-zinc-700 *:shrink-0 *:select-none *:bg-white dark:*:bg-zinc-900"
     >
-      <a
-        href={AUTHOR_X}
-        class="rounded-full px-3 py-1 flex items-center gap-1.5 font-medium border-[0.5px] border-gray-300 shrink-0 select-none"
-      >
-        <Icon name="mynaui:brand-twitter" class="size-5 stroke-2" />
+      <a target="_blank" href={AUTHOR_X}>
+        <Icon
+          name="mynaui:brand-twitter"
+          class="size-5 stroke-2 text-sky-500"
+        />
         Follow for Updates
       </a>
-      <a
-        href={AUTHOR_GITHUB}
-        class="rounded-full px-3 py-1 flex items-center gap-1.5 font-medium border-[0.5px] border-gray-300 shrink-0 select-none"
-      >
+      <a target="_blank" href="https://github.com/praveenjuge/ui">
         <Icon name="mynaui:brand-github" class="size-5 stroke-2" />
         GitHub
       </a>
-      <a
-        href="https://ui.praveenjuge.com/rss"
-        class="rounded-full px-3 py-1 flex items-center gap-1.5 font-medium border-[0.5px] border-gray-300 shrink-0 select-none"
-      >
-        <Icon name="mynaui:rss" class="size-5 stroke-2" />
+      <a target="_blank" href="https://ui.praveenjuge.com/rss">
+        <Icon name="mynaui:rss" class="size-5 stroke-2 text-orange-500" />
         RSS
       </a>
     </div>
   </header>
+  <main id="main" class="space-y-24 my-24">
+    {tips.map((tip: any) => <SinglePost tip={tip} />)}
+  </main>
 </Layout>

@@ -1,0 +1,34 @@
+---
+const { tip } = Astro.props;
+---
+
+<div class="flex flex-col lg:flex-row gap-6">
+  <img
+    alt={tip.data.title}
+    src={`https://picsum.photos/id/${tip.id}/1024/768`}
+    class="size-[500px] shrink-0 object-cover rounded-lg bg-zinc-100 dark:bg-zinc-900"
+  />
+  <div class="space-y-4">
+    <h2 class="text-2xl font-semibold">
+      <a href={`/${tip.id}`}>{tip.data.title}</a>
+    </h2>
+    <div
+      set:html={tip.rendered.html}
+      class="text-zinc-700 dark:text-zinc-300 space-y-2"
+    />
+    <div class="flex items-center flex-wrap font-medium text-sm gap-3">
+      {
+        tip.data.categories.map((category: string) => (
+          <a
+            href="#"
+            class="bg-white dark:bg-zinc-900 border-[0.5px] border-zinc-300 dark:border-zinc-700 rounded-full px-2"
+          >
+            {category}
+          </a>
+        ))
+      }
+      <a href="#">Copy Link</a>
+      <a href="#">Share</a>
+    </div>
+  </div>
+</div>
