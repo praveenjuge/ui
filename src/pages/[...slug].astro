@@ -2,25 +2,21 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import Layout from "../Layout.astro";
 import SinglePost from "../SinglePost.astro";
-import { Icon } from "astro-icon/components";
+import BackButton from "../BackButton.astro";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("tips");
-  return posts.map((post) => ({
-    params: { slug: post.id },
-    props: post,
+  const tips = await getCollection("tips");
+  return tips.map((tip: any) => ({
+    params: { slug: tip.id },
+    props: tip,
   }));
 }
+
 type Props = CollectionEntry<"tips">;
 const tip = Astro.props;
 ---
 
 <Layout title={tip.data.title}>
-  <a
-    href="/"
-    class="mb-10 font-medium inline-flex items-center gap-2 bg-white dark:bg-zinc-900 px-3 py-2 rounded-md text-xs font-medium border-[0.5px] border-zinc-300 dark:border-zinc-700"
-  >
-    <Icon name="mynaui:arrow-left" class="stroke-2 size-4" /> All Tips
-  </a>
+  <BackButton />
   <SinglePost tip={tip} />
 </Layout>

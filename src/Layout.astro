@@ -28,7 +28,7 @@ const coverImage = mosaic
 
 <html
   lang="en"
-  class="text-zinc-950 dark:text-zinc-50 antialiased bg-white dark:bg-zinc-950 [font-feature-settings:'ss01','ss02','ss03','ss04','ss05','ss07','ss08','ss09'] [touch-action:manipulation] [&_img]:bg-zinc-100 dark:[&_img]:bg-zinc-900 [scroll-behavior:smooth]"
+  class="text-slate-950 dark:text-slate-50 antialiased bg-white dark:bg-slate-950 [font-feature-settings:'ss01','ss02','ss03','ss04','ss05','ss07','ss08','ss09'] [touch-action:manipulation] [&_img]:bg-slate-100 dark:[&_img]:bg-slate-900 [scroll-behavior:smooth]"
 >
   <head>
     <!-- Main Metadata -->
@@ -103,7 +103,7 @@ const coverImage = mosaic
     <meta property="twitter:url" content={canonicalURL} />
 
     <!-- Styles -->
-    <style>
+    <!-- <style>
       html {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg fill='%23fafafa' %3E%3Cpolygon points='8 4 12 6 8 8 6 12 4 8 0 6 4 4 6 0 8 4'/%3E%3C/g%3E%3C/svg%3E");
       }
@@ -112,9 +112,36 @@ const coverImage = mosaic
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg fill='%2318181b' fill-opacity='0.5'%3E%3Cpolygon points='8 4 12 6 8 8 6 12 4 8 0 6 4 4 6 0 8 4'/%3E%3C/g%3E%3C/svg%3E");
         }
       }
-    </style>
+    </style> -->
   </head>
-  <body class="py-14 px-4 md:px-14 max-w-6xl mx-auto text-sm">
+  <body class="py-16 px-4 md:px-16 max-w-6xl mx-auto">
     <slot />
+    <script>
+      function setupCopyLink() {
+        const copyButtons = document.querySelectorAll("[data-copy-link]");
+
+        copyButtons.forEach((button) => {
+          button.addEventListener("click", async () => {
+            const url = button.getAttribute("data-url");
+            if (!url) return;
+
+            try {
+              await navigator.clipboard.writeText(url);
+              const originalText = button.textContent;
+              button.textContent = "Copied!";
+
+              setTimeout(() => {
+                button.textContent = originalText;
+              }, 2000);
+            } catch (err) {
+              console.error("Failed to copy:", err);
+            }
+          });
+        });
+      }
+
+      // Run on initial load
+      setupCopyLink();
+    </script>
   </body>
 </html>

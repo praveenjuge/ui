@@ -1,34 +1,173 @@
 ---
+import { Image } from "astro:assets";
+
 const { tip } = Astro.props;
 ---
 
-<div class="flex flex-col lg:flex-row gap-6">
-  <img
-    alt={tip.data.title}
-    src={`https://picsum.photos/id/${tip.id}/1024/768`}
-    class="size-[500px] shrink-0 object-cover rounded-lg bg-zinc-100 dark:bg-zinc-900"
-  />
+<div class="flex flex-col lg:flex-row gap-10">
+  <a href={`/${tip.id}`} class="block shrink-0 select-none">
+    <Image
+      width={1000}
+      height={1000}
+      alt={tip.data.title}
+      src={`/src/tips/${tip.id}.png`}
+      class="sm:w-[500px] rounded-lg bg-slate-100 dark:bg-slate-900 border-[0.5px] border-slate-300 dark:border-slate-700"
+    />
+  </a>
   <div class="space-y-4">
     <h2 class="text-2xl font-semibold">
       <a href={`/${tip.id}`}>{tip.data.title}</a>
     </h2>
     <div
       set:html={tip.rendered.html}
-      class="text-zinc-700 dark:text-zinc-300 space-y-2"
+      class="text-slate-700 dark:text-slate-300 space-y-2 text-sm leading-5
+  		[&_p]:my-5
+			[&_a]:underline
+			[&_a]:font-semibold
+			[&_a]:text-slate-900
+			[&_strong>a]:font-bold
+			[&_strong]:text-slate-900
+			[&_strong]:font-semibold
+			[&_a_strong]:text-inherit
+			[&_blockquote_strong]:text-inherit
+			
+			[&_code]:text-slate-900
+			[&_code]:font-semibold
+			[&_code]:text-sm
+			[&_code]:bg-slate-50
+			[&_code]:rounded-md
+			[&_code]:py-0.5
+			[&_code]:px-1
+			[&_code]:border
+			[&_code]:border-slate-300
+			[&_a_code]:text-inherit
+			[&_h1_code]:text-inherit
+			[&_h2_code]:text-inherit
+			[&_h2_code]:text-sm
+			[&_h3_code]:text-inherit
+			[&_h3_code]:text-[0.9em]
+			[&_h4_code]:text-inherit
+			
+			[&_pre]:text-sm
+			[&_pre]:my-7
+			[&_pre]:rounded-lg
+			[&_pre]:p-4
+			[&_pre_code]:bg-transparent
+			[&_pre_code]:border-0
+			[&_pre_code]:rounded-none
+			[&_pre_code]:p-0
+			[&_pre_code]:font-normal
+			
+			[&_h1]:text-balance
+			[&_h1]:tracking-tighter
+			[&_h1]:text-slate-900
+			[&_h1]:font-extrabold
+			[&_h1]:text-4xl
+			[&_h1]:mt-0
+			[&_h1]:mb-[0.8888889em]
+			[&_h2]:text-slate-900
+			[&_h2]:font-bold
+			[&_h2]:text-2xl
+			[&_h2]:mt-12
+			[&_h2]:mb-6
+			[&_h2]:leading-[1.3333333]
+			[&_h2_strong]:font-extrabold
+			[&_h2_strong]:text-inherit
+			[&_h3]:text-slate-900
+			[&_h3]:font-semibold
+			[&_h3]:text-xl
+			[&_h3]:mt-8
+			[&_h3]:mb-4
+			[&_h3_strong]:font-bold
+			[&_h3_strong]:text-inherit
+			[&_h4]:text-slate-900
+			[&_h4]:font-semibold
+			[&_h4]:mt-6
+			[&_h4]:mb-2
+			[&_h4]:leading-6
+			[&_h4_strong]:font-bold
+			[&_h4_strong]:text-inherit
+			[&_h2+*]:!mt-0
+			[&_h3+*]:!mt-0
+			[&_h4+*]:!mt-0
+			[&_ol]:list-decimal
+			[&_ul]:list-disc
+			[&_ol]:my-5
+			[&_ol]:pl-6
+			[&_ul]:my-5
+			[&_ul]:pl-6
+			[&_dl]:my-5
+			[&_dd]:mt-2
+			[&_dd]:pl-6
+			[&_dt]:mt-5
+			[&_li]:my-2
+			[&_ol>li]:marker:font-normal
+			[&_ol>li]:marker:text-slate-500
+			[&_ul>li]:marker:text-slate-300
+			[&_dt]:text-slate-900
+			[&_dt]:font-semibold
+			[&_ol>li]:pl-[0.375em]
+  		[&_ul>li]:pl-[0.375em]
+			[&_ul>li>p]:my-3
+			[&_ul>li>p:first-child]:my-5
+			[&_ol>li>p:first-child]:my-5
+			[&_ul_ul]:my-3
+			[&_ul_ol]:my-3
+			[&_ol_ul]:my-3
+			[&_ol_ol]:my-3
+			[&_hr]:border-t
+			[&_hr]:border-slate-200
+			[&_hr]:my-12
+			[&_hr+*]:!mt-0
+			[&_blockquote]:font-medium
+			[&_blockquote]:italic
+			[&_blockquote]:text-slate-900
+			[&_blockquote]:border-l-4
+			[&_blockquote]:border-slate-200
+			[&_blockquote]:my-6
+			[&_blockquote]:pl-4
+			[&_blockquote_code]:text-inherit
+			[&_img]:my-8
+			[&_picture]:block
+			[&_picture]:my-8
+			[&_picture>img]:my-0
+			[&_video]:my-8
+			[&_figure_*]:my-0
+			[&_figure]:my-8
+			[&_figcaption]:text-slate-500
+			[&_figcaption]:text-sm
+			[&_figcaption]:leading-[1.4285714]
+			[&_figcaption]:mt-[0.8571429em]"
     />
-    <div class="flex items-center flex-wrap font-medium text-sm gap-3">
+    <div
+      class="flex items-center flex-wrap font-medium text-sm gap-3 select-none"
+    >
       {
         tip.data.categories.map((category: string) => (
           <a
-            href="#"
-            class="bg-white dark:bg-zinc-900 border-[0.5px] border-zinc-300 dark:border-zinc-700 rounded-full px-2"
+            href={`/tags/${category}`}
+            class="bg-white dark:bg-slate-900 border-[0.5px] border-slate-300 dark:border-slate-700 rounded-full px-2"
           >
             {category}
           </a>
         ))
       }
-      <a href="#">Copy Link</a>
-      <a href="#">Share</a>
+      <button
+        data-copy-link
+        class="cursor-pointer"
+        data-url={`https://ui.praveenjuge.com/${tip.id}`}
+      >
+        Copy Link
+      </button>
+      <a
+        href={`https://x.com/intent/tweet?text=${encodeURIComponent(
+          `UI Tip: ${tip.data.title}`
+        )}&url=${encodeURIComponent(`https://ui.praveenjuge.com/${tip.id}`)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Share
+      </a>
     </div>
   </div>
 </div>

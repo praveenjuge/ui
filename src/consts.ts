@@ -2,6 +2,7 @@ export const SITE_TITLE = "UI Tips";
 export const SITE_DESCRIPTION =
   "Writing down some design tricks I know so that I won’t forget them.";
 export const SITE_COLOR = "#e5e7eb";
+export const SITE_URL = "https://ui.praveenjuge.com";
 
 export const AUTHOR_NAME = "Praveen Juge";
 export const AUTHOR_IMAGE = "https://praveenjuge.com/praveenjuge.jpg";

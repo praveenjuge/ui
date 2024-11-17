@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+
+Host: https://ui.praveenjuge.com
+Sitemap: https://ui.praveenjuge.com/sitemap-index.xml

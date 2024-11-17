@@ -1,0 +1,21 @@
+---
+import Layout from "../../Layout.astro";
+import BackButton from "../../BackButton.astro";
+import { getCollection } from "astro:content";
+
+const allTips = await getCollection("tips");
+const tags = [
+  ...new Set(allTips.map((post: any) => post.data.categories).flat()),
+];
+const pageTitle = "All Tags";
+---
+
+<Layout title={pageTitle}>
+  <BackButton />
+  <h1 class="text-3xl font-semibold tracking-tight mb-8">{pageTitle}</h1>
+  <div
+    class="flex flex-wrap gap-2.5 text-sm font-medium [&_a]:rounded-full [&_a]:border [&_a]:border-slate-300 [&_a]:dark:border-slate-700 [&_a]:bg-white [&_a]:dark:bg-slate-900 [&_a]:px-3 [&_a]:py-px"
+  >
+    {tags.map((tag) => <a href={`/tags/${tag}`}>{tag}</a>)}
+  </div>
+</Layout>

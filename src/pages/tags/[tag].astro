@@ -1,0 +1,42 @@
+---
+import Layout from "../../Layout.astro";
+import BackButton from "../../BackButton.astro";
+import SinglePost from "../../SinglePost.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const allTips = await getCollection("tips");
+
+  const uniqueTags = [
+    ...new Set(allTips.map((post: any) => post.data.categories).flat()),
+  ];
+
+  return uniqueTags.map((tag) => {
+    const filteredTips = allTips.filter((post: any) =>
+      post.data.categories.includes(tag)
+    );
+    return {
+      params: { tag },
+      props: { tips: filteredTips },
+    };
+  });
+}
+
+const { tag } = Astro.params;
+const { tips } = Astro.props;
+
+const filteredTips = tips.filter((post: any) =>
+  post.data.categories?.includes(tag)
+);
+---
+
+<Layout title={tag}>
+  <BackButton />
+  <h1 class="text-3xl font-semibold tracking-tight mb-8">
+    Tips in
+    <span>{tag}</span>
+  </h1>
+  <main id="main" class="space-y-24 my-12">
+    {filteredTips.map((tip: any) => <SinglePost tip={tip} />)}
+  </main>
+</Layout>
