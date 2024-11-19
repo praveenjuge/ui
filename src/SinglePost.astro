@@ -1,16 +1,14 @@
 ---
-import { Image } from "astro:assets";
-
 const { tip } = Astro.props;
 ---
 
 <article class="flex flex-col lg:flex-row gap-10">
   <a href={`/${tip.id}`} class="block shrink-0 select-none">
-    <Image
+    <img
       width={1000}
       height={1000}
       alt={tip.data.title}
-      src={`/src/tips/${tip.id}.png`}
+      src={`/${tip.id}.png`}
       class="sm:w-[500px] rounded-lg bg-slate-100 dark:bg-slate-900 border-[0.5px] border-slate-300 dark:border-slate-700"
     />
   </a>
