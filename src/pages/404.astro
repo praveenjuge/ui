@@ -1,19 +1,27 @@
 ---
-import { AUTHOR_X } from "../consts";
-import Layout from "../Layout.astro";
-import BackButton from "../BackButton.astro";
+import Base from "../layouts/Base.astro";
 ---
 
-<Layout title="Page not found (404)">
-  <BackButton />
-  <h1 class="mb-2 font-bold">Page not found (404) ¯\_(ツ)_/¯</h1>
-  <p class="opacity-75">
-    If you think this is a mistake, please let me know at{" "}
-    <a
-      href={AUTHOR_X}
-      target="_blank"
-      class="underline"
-      rel="noreferrer noopener">Twitter</a
-    >.
-  </p>
-</Layout>
+<Base title="Not found">
+  <section class="wrap missing">
+    <p class="mono accent">404</p>
+    <h1>There's no tip here.</h1>
+    <p class="muted">It may not be published yet. <a href="/">See all tips</a>.</p>
+  </section>
+</Base>
+
+<style>
+  .missing {
+    display: grid;
+    gap: 12px;
+    padding-top: 96px;
+  }
+  h1 {
+    font-size: 32px;
+    font-weight: 560;
+    letter-spacing: -0.03em;
+  }
+  a {
+    color: var(--accent);
+  }
+</style>

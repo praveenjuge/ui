@@ -1,79 +1,164 @@
 ---
-import { AUTHOR_X, SITE_DESCRIPTION, SITE_TITLE } from "../consts";
-import Layout from "../Layout.astro";
-import { getCollection } from "astro:content";
-import SinglePost from "../SinglePost.astro";
-const tips = (await getCollection("tips")).sort(
-  (a: any, b: any) => parseInt(b.id) - parseInt(a.id)
-);
+import Base from "../layouts/Base.astro";
+import TipCard from "../components/TipCard.astro";
+import { CATEGORIES, CATEGORY_IDS } from "../lib/categories";
+import { getTips } from "../lib/tips";
+
+const tips = (await getTips()).reverse();
 ---
 
-<Layout title="Home">
-  <header class="text-center max-w-xs mx-auto space-y-2">
-    <h1 class="text-3xl font-bold tracking-tight">{SITE_TITLE}</h1>
-    <p class="text-lg text-slate-500">{SITE_DESCRIPTION}</p>
-    <div
-      class="flex items-center justify-center gap-1.5 text-xs font-medium pt-2 *:rounded-full *:px-3 *:py-1 *:flex *:items-center *:gap-1.5 *:font-medium *:border-[0.5px] *:border-slate-300 dark:*:border-slate-700 *:shrink-0 *:select-none *:bg-white dark:*:bg-slate-900"
-    >
-      <a target="_blank" href={AUTHOR_X}>
-        <svg
-          class="size-5 text-sky-500"
-          width="24"
-          height="24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          xmlns="http://www.w3.org/2000/svg"
-          ><path
-            d="M21 4.85c-.9.443-1.782.623-2.7.896-1.009-1.145-2.505-1.208-3.942-.667C12.427 5.806 12 7.529 12 9.364c-2.92.075-5.521-1.262-7.2-3.618 0 0-3.764 6.723 3.6 9.95-1.685 1.127-3.365 1.888-5.4 1.808 2.977 1.631 6.222 2.192 9.03 1.372 4.63-1.351 7.36-5.722 7.334-10.397 0-.225 1.359-2.506 1.636-3.629"
-          ></path></svg
-        >
-        Follow for Updates
-      </a>
-      <a target="_blank" href="https://github.com/praveenjuge/ui">
-        <svg
-          class="size-5"
-          width="24"
-          height="24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          xmlns="http://www.w3.org/2000/svg"
-          ><path
-            d="M3.5 15.668c.45.054.783.26 1 .618.326.537 1.537 2.526 2.913 2.526H9.5m5.672-3.513c.549.719.823 1.364.823 1.936V21m-5.625-5.609c-.58.637-.869 1.24-.869 1.813V21"
-          ></path><path
-            d="M15.172 15.299c1.202-.25 2.293-.682 3.14-1.316 1.448-1.084 2.188-2.758 2.188-4.411 0-1.16-.44-2.243-1.204-3.16-.425-.511.819-3.872-.286-3.359-1.105.514-2.725 1.198-3.574.947-.909-.268-1.9-.416-2.936-.416-.9 0-1.766.111-2.574.317-1.174.298-2.296-.363-3.426-.848-1.13-.484-.513 3.008-.849 3.422C4.921 7.38 4.5 8.44 4.5 9.572c0 1.653.895 3.327 2.343 4.41.965.722 2.174 1.183 3.527 1.41"
-          ></path></svg
-        >
-        GitHub
-      </a>
-      <a target="_blank" href="/rss.xml">
-        <svg
-          class="size-5 text-orange-500"
-          width="24"
-          height="24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          xmlns="http://www.w3.org/2000/svg"
-          ><path
-            d="M6 11.25A6.75 6.75 0 0 1 12.75 18M6 6a12 12 0 0 1 12 12m-11.5-.146.354-.354"
-          ></path></svg
-        >
-        RSS
-      </a>
+<Base>
+  <section class="wrap intro">
+    <h1>Small UI tips, one a day.</h1>
+    <p class="muted">
+      Short, numbered notes on layout, type, forms and accessibility. Each one has a line drawing you can poke at, and
+      images and videos you can download.
+    </p>
+  </section>
+
+  <section class="wrap controls" aria-label="Filter tips">
+    <div class="chips" role="group" aria-label="Category">
+      <button type="button" class="chip mono" data-category="" aria-pressed="true">All</button>
+      {
+        CATEGORY_IDS.map((id) => (
+          <button type="button" class="chip mono" data-category={id} aria-pressed="false">
+            {CATEGORIES[id]}
+          </button>
+        ))
+      }
     </div>
-  </header>
-  <main id="main" class="space-y-24 my-24">
-    {tips.map((tip: any) => <SinglePost tip={tip} />)}
-  </main>
-</Layout>
+    <label class="search">
+      <span class="visually-hidden">Search tips</span>
+      <input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false" />
+    </label>
+  </section>
+
+  <section class="wrap grid" id="grid">
+    {tips.map((tip) => <TipCard tip={tip} />)}
+  </section>
+  <p class="wrap empty muted" id="empty" hidden>No tips match that. Try another word or category.</p>
+</Base>
+
+<script>
+  const cards = [...document.querySelectorAll<HTMLElement>("#grid .card")];
+  const chips = [...document.querySelectorAll<HTMLButtonElement>(".chip")];
+  const input = document.getElementById("search") as HTMLInputElement;
+  const empty = document.getElementById("empty")!;
+  const params = new URLSearchParams(location.search);
+  let category = params.get("category") ?? "";
+  input.value = params.get("q") ?? "";
+
+  function apply() {
+    const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const card of cards) {
+      const match =
+        (!category || card.dataset.category === category) &&
+        words.every((word) => card.dataset.search!.includes(word));
+      card.hidden = !match;
+      if (match) shown++;
+    }
+    empty.hidden = shown > 0;
+    for (const chip of chips) chip.setAttribute("aria-pressed", String(chip.dataset.category === category));
+
+    const url = new URL(location.href);
+    category ? url.searchParams.set("category", category) : url.searchParams.delete("category");
+    input.value ? url.searchParams.set("q", input.value) : url.searchParams.delete("q");
+    history.replaceState(null, "", url);
+  }
+
+  for (const chip of chips) {
+    chip.addEventListener("click", () => {
+      category = chip.dataset.category ?? "";
+      apply();
+    });
+  }
+  input.addEventListener("input", apply);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "/" && document.activeElement !== input) {
+      event.preventDefault();
+      input.focus();
+    }
+  });
+  apply();
+</script>
+
+<style>
+  .intro {
+    display: grid;
+    gap: 12px;
+    padding-top: 56px;
+    padding-bottom: 40px;
+  }
+  .intro h1 {
+    font-size: clamp(30px, 6vw, 48px);
+    line-height: 1.08;
+    font-weight: 560;
+    letter-spacing: -0.035em;
+  }
+  .intro p {
+    max-width: 52ch;
+    font-size: 16px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .chip:hover {
+    color: var(--ink);
+    border-color: var(--muted);
+  }
+  .chip[aria-pressed="true"] {
+    background: var(--accent-soft);
+    border-color: transparent;
+    color: var(--accent);
+  }
+  .search {
+    flex: 1 1 200px;
+    max-width: 280px;
+  }
+  .search input {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    font-size: 14px;
+  }
+  .search input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  @media (max-width: 560px) {
+    .search {
+      max-width: none;
+    }
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+    gap: 16px;
+  }
+  .empty {
+    padding-top: 32px;
+  }
+</style>

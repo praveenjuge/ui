@@ -1,0 +1,50 @@
+---
+/**
+ * A tip's words: its number and category, title and body. Sizes come from
+ * custom properties so the card, the page and each render format can set them.
+ */
+import { CATEGORIES } from "../lib/categories";
+import { pad } from "../lib/media";
+import type { Tip } from "../lib/tips";
+
+interface Props {
+  tip: Tip;
+  heading?: "h1" | "h2" | "h3";
+  /** Show the category beside the number. */
+  category?: boolean;
+}
+
+const { tip, heading: Heading = "h2", category = true } = Astro.props;
+const { number, title, body } = tip.data;
+---
+
+<div class="tip-text">
+  <p class="meta mono">
+    <span class="accent">#{pad(number)}</span>{category && <span class="muted"> · {CATEGORIES[tip.data.category]}</span>}
+  </p>
+  <Heading class="title">{title}</Heading>
+  <p class="body">{body}</p>
+</div>
+
+<style>
+  .tip-text {
+    display: grid;
+    gap: var(--text-gap, 8px);
+  }
+  .meta {
+    font-size: var(--meta-size, 12px);
+  }
+  .title {
+    font-size: var(--title-size, 17px);
+    line-height: var(--title-leading, 1.25);
+    font-weight: 560;
+    letter-spacing: var(--title-tracking, -0.01em);
+    text-wrap: balance;
+  }
+  .body {
+    font-size: var(--body-size, 14px);
+    line-height: var(--body-leading, 1.55);
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+</style>

@@ -1,47 +1,31 @@
+import { existsSync, statSync } from "node:fs";
+import { resolve } from "node:path";
 import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
-import {
-  SITE_TITLE,
-  SITE_DESCRIPTION,
-  AUTHOR_NAME,
-  SITE_URL,
-  AUTHOR_EMAIL,
-} from "../consts";
+import { SHARE, mediaPath, pad } from "../lib/media";
+import { SITE } from "../lib/site";
+import { getTips } from "../lib/tips";
 
 export const GET: APIRoute = async () => {
-  const postImportResult = import.meta.glob("../content/tips/*.md", {
-    eager: true,
-  });
-  const posts = Object.values(postImportResult);
-  const sortedPosts = [...posts].sort((a: any, b: any) => {
-    return (
-      new Date(b.frontmatter.pubDate).getTime() -
-      new Date(a.frontmatter.pubDate).getTime()
-    );
-  });
-
+  const tips = (await getTips()).reverse();
   return rss({
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    site: SITE_URL,
+    title: SITE.title,
+    description: SITE.description,
+    site: SITE.url,
     trailingSlash: false,
-    items: await Promise.all(
-      sortedPosts.map(async (post: any) => {
-        return {
-          title: post.frontmatter.title,
-          description: post.frontmatter.description,
-          pubDate: post.frontmatter.pubDate,
-          author: AUTHOR_EMAIL,
-          link: `/${post.file.split("/").pop()?.split(".")[0]}`,
-          content: await post.compiledContent(),
-        };
-      })
-    ),
-    customData: [
-      "<category>Design</category>",
-      "<category>Technology</category>",
-      `<language>en-us</language>`,
-      `<copyright>Copyright ${AUTHOR_NAME}</copyright>`,
-    ].join(""),
+    items: tips.map(({ data }) => {
+      const image = mediaPath(data.number, SHARE.file);
+      const file = resolve("public", image.slice(1));
+      return {
+        title: `#${pad(data.number)} · ${data.title}`,
+        description: data.body,
+        link: `/${data.number}`,
+        pubDate: data.date,
+        enclosure: existsSync(file)
+          ? { url: `${SITE.url}${image}`, type: "image/png", length: statSync(file).size }
+          : undefined,
+      };
+    }),
+    customData: "<language>en-us</language>",
   });
 };

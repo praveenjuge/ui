@@ -1,0 +1,14 @@
+{
+  "name": "ui-deploy",
+  "private": true,
+  "type": "module",
+  "description": "Deploys the built site (../dist) as a static Worker with cf. Kept apart from the Astro package so cf takes its static-site path instead of building Astro itself.",
+  "scripts": {
+    "dev": "cf dev",
+    "deploy": "cf deploy"
+  },
+  "devDependencies": {
+    "cf": "1.0.0-beta.14",
+    "wrangler": "4.149.0"
+  }
+}

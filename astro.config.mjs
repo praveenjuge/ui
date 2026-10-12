@@ -1,14 +1,16 @@
 // @ts-check
 import { defineConfig } from "astro/config";
-import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 
 export default defineConfig({
   site: "https://ui.praveenjuge.com",
-  prefetch: {
-    prefetchAll: true,
-    defaultStrategy: "load",
-  },
-  integrations: [sitemap()],
-  vite: { plugins: [tailwindcss()] },
+  trailingSlash: "never",
+  // "file" gives dist/12.html, which Cloudflare serves at /12 with no trailing slash.
+  build: { format: "file" },
+  integrations: [
+    sitemap({
+      // The render and lab pages are tools, not pages for readers.
+      filter: (page) => !/^\/(render|lab)\//.test(new URL(page).pathname),
+    }),
+  ],
 });

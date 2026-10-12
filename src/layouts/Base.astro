@@ -1,0 +1,138 @@
+---
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
+import "../styles/global.css";
+import Footer from "../components/Footer.astro";
+import { SITE } from "../lib/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Absolute URL of the share image. */
+  image?: string;
+}
+
+const { title, description = SITE.description, image } = Astro.props;
+const fullTitle = title ? `${title} · ${SITE.title}` : `${SITE.title} by ${SITE.author}`;
+// Pages build to /12.html but are served at /12.
+const path = Astro.url.pathname.replace(/(index)?\.html$/, "").replace(/(.)\/$/, "$1");
+const canonical = new URL(path, SITE.url).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content={image ? "article" : "website"} />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta property="og:title" content={title ?? SITE.title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {image && <meta property="og:image" content={image} />}
+    {image && <meta property="og:image:width" content="1920" />}
+    {image && <meta property="og:image:height" content="1080" />}
+    <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
+    <script is:inline>
+      try {
+        const theme = localStorage.getItem("theme");
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <header class="wrap header">
+      <a href="/" class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        <span>{SITE.title}</span>
+      </a>
+      <nav class="tools">
+        <a href="/rss.xml" class="mono muted link">RSS</a>
+        <button type="button" class="theme mono" id="theme-toggle" aria-label="Switch between light and dark">
+          <span class="theme-label"></span>
+        </button>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      const root = document.documentElement;
+      const button = document.getElementById("theme-toggle")!;
+      const label = button.querySelector(".theme-label")!;
+      const isDark = () =>
+        root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+      const show = () => (label.textContent = isDark() ? "Dark" : "Light");
+      button.addEventListener("click", () => {
+        const next = isDark() ? "light" : "dark";
+        root.dataset.theme = next;
+        try {
+          localStorage.setItem("theme", next);
+        } catch {}
+        show();
+      });
+      matchMedia("(prefers-color-scheme: dark)").addEventListener("change", show);
+      show();
+    </script>
+  </body>
+</html>
+
+<style>
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 72px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 560;
+    letter-spacing: -0.01em;
+  }
+  .mark {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--ink);
+    border-radius: 5px;
+    position: relative;
+  }
+  .mark::after {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .link:hover {
+    color: var(--ink);
+  }
+  .theme {
+    height: 30px;
+    min-width: 64px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .theme:hover {
+    border-color: var(--muted);
+  }
+</style>

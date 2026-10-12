@@ -1,0 +1,83 @@
+---
+/**
+ * A tip's figure on a stage. The figure's file is imported only when this
+ * element mounts it: at once, or, with `lazy`, when it nears the viewport
+ * (and it is torn down again when it leaves, so a long grid stays light).
+ */
+interface Props {
+  figure: string;
+  /** Walk the figure's tour until a hand arrives. */
+  play?: boolean;
+  lazy?: boolean;
+  class?: string;
+}
+
+const { figure, play = false, lazy = false, class: className } = Astro.props;
+---
+
+<tip-figure
+  class:list={["figure", className]}
+  data-figure={figure}
+  data-play={play ? "" : undefined}
+  data-lazy={lazy ? "" : undefined}
+>
+  <div class="stage"></div>
+</tip-figure>
+
+<script>
+  import { loadFigure, mountFigure, type Mounted } from "../lib/figure/host";
+
+  class TipFigure extends HTMLElement {
+    #mounted: Mounted | undefined;
+    #io: IntersectionObserver | undefined;
+    #generation = 0;
+
+    connectedCallback() {
+      if (!this.hasAttribute("data-lazy")) return void this.#mount();
+      this.#io = new IntersectionObserver(
+        ([entry]) => (entry?.isIntersecting ? this.#mount() : this.#unmount()),
+        { rootMargin: "400px 0px" },
+      );
+      this.#io.observe(this);
+    }
+
+    disconnectedCallback() {
+      this.#io?.disconnect();
+      this.#unmount();
+    }
+
+    async #mount() {
+      if (this.#mounted) return;
+      const generation = ++this.#generation;
+      const figure = await loadFigure(this.dataset.figure ?? "");
+      if (generation !== this.#generation || this.#mounted) return;
+      const stage = this.querySelector<HTMLElement>(".stage")!;
+      this.#mounted = mountFigure(stage, figure, {
+        play: this.hasAttribute("data-play"),
+      });
+      this.dataset.mounted = "";
+    }
+
+    #unmount() {
+      this.#generation++;
+      this.#mounted?.destroy();
+      this.#mounted = undefined;
+      delete this.dataset.mounted;
+    }
+  }
+
+  customElements.define("tip-figure", TipFigure);
+</script>
+
+<style>
+  .figure {
+    position: relative;
+    display: block;
+  }
+  .stage {
+    aspect-ratio: 5 / 4;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+</style>

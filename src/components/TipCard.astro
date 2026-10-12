@@ -1,0 +1,42 @@
+---
+import Figure from "./Figure.astro";
+import TipText from "./TipText.astro";
+import { CATEGORIES } from "../lib/categories";
+import type { Tip } from "../lib/tips";
+
+interface Props {
+  tip: Tip;
+}
+
+const { tip } = Astro.props;
+const { number, title, body, category, figure } = tip.data;
+const search = [title, body, CATEGORIES[category]].join(" ").toLowerCase();
+---
+
+<a href={`/${number}`} class="card" data-category={category} data-search={search}>
+  <Figure figure={figure} lazy class="card-figure" />
+  <div class="card-text">
+    <TipText tip={tip} heading="h2" />
+  </div>
+</a>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 200ms ease;
+  }
+  .card:hover {
+    border-color: var(--muted);
+  }
+  .card[hidden] {
+    display: none;
+  }
+  .card-text {
+    padding: 4px 18px 20px;
+  }
+</style>

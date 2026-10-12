@@ -1,0 +1,230 @@
+/*
+ * Tokens. Light and dark follow the system until the toggle sets
+ * data-theme on <html>. Any element can carry data-theme to pin its subtree,
+ * which is how the render surface draws one theme regardless of the system.
+ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #f6f6f8;
+  --ink: #141418;
+  --muted: #6c6c75;
+  --line: #e4e4e9;
+  --accent: #2448ff;
+  --accent-soft: #e9edff;
+  /*
+   * Figures: the wireframe's tones. All of them stay light on light and dark
+   * on dark, so the accent is the only thing that stands out.
+   */
+  --fig-frame: #c0c0c9;
+  --fig-ui: #d6d6dd;
+  --fig-text: #ebebf0;
+  --fig-ink: #b4b4be;
+  --fig-word: #5c5c66;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #09090b;
+    --surface: #111114;
+    --ink: #ececf1;
+    --muted: #8b8c96;
+    --line: #26262c;
+    --accent: #7590ff;
+    --accent-soft: #161c3a;
+    --fig-frame: #45464e;
+    --fig-ui: #34353c;
+    --fig-text: #222329;
+    --fig-ink: #50525b;
+    --fig-word: #a4a5ae;
+  }
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #09090b;
+  --surface: #111114;
+  --ink: #ececf1;
+  --muted: #8b8c96;
+  --line: #26262c;
+  --accent: #7590ff;
+  --accent-soft: #161c3a;
+  --fig-frame: #45464e;
+  --fig-ui: #34353c;
+  --fig-text: #222329;
+  --fig-ink: #50525b;
+  --fig-word: #a4a5ae;
+}
+
+/*
+ * Figures (src/lib/figure): flat wireframes. Every colour, stroke and fill a
+ * figure shows comes from these classes; a figure sets none of its own.
+ */
+.figure-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.figure-svg :where(rect, circle, line, path) {
+  fill: none;
+  stroke: var(--fig-ui);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.figure-svg .frame {
+  stroke: var(--fig-frame);
+  stroke-width: 1.25;
+}
+.figure-svg .text {
+  stroke: var(--fig-text);
+}
+.figure-svg .guide {
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+.figure-svg .plate {
+  fill: var(--bg);
+}
+.figure-svg .fill {
+  fill: var(--fig-text);
+  stroke: none;
+}
+.figure-svg .accent,
+.figure-svg .accent :where(rect, circle, line, path) {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+.figure-svg .fill.accent {
+  fill: var(--accent);
+}
+.figure-svg .ink {
+  stroke: var(--fig-ink);
+}
+.figure-svg .fill.ink {
+  fill: var(--fig-ink);
+}
+.figure-svg .dim path {
+  stroke-width: 1;
+}
+.figure-svg .label {
+  fill: var(--accent);
+  stroke: none;
+  font: 500 10px var(--mono);
+  letter-spacing: 0.02em;
+}
+.figure-svg .label.ink {
+  fill: var(--fig-word);
+}
+.figure-svg .label.muted {
+  fill: var(--muted);
+}
+/* Words that are part of the interface, like a button's label, rather than a measurement. */
+.figure-svg .label.sans {
+  font-family: var(--sans);
+  letter-spacing: 0;
+}
+
+:root {
+  --sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius: 14px;
+  --gutter: 16px;
+  --max: 1120px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+@media (min-width: 720px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

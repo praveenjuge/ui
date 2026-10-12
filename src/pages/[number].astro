@@ -1,0 +1,248 @@
+---
+import Base from "../layouts/Base.astro";
+import Figure from "../components/Figure.astro";
+import TipText from "../components/TipText.astro";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { IMAGE_SIZES, SHARE, SIZES, THEMES, VIDEO_SIZES, downloadName, mediaPath, videoFile } from "../lib/media";
+import { SITE } from "../lib/site";
+import { getTips, type Tip } from "../lib/tips";
+
+export async function getStaticPaths() {
+  const tips = await getTips();
+  return tips.map((tip, i) => ({
+    params: { number: String(tip.data.number) },
+    props: { tip, prev: tips[i - 1], next: tips[i + 1] },
+  }));
+}
+
+interface Props {
+  tip: Tip;
+  prev?: Tip;
+  next?: Tip;
+}
+
+const { tip, prev, next } = Astro.props;
+const { number, title, body, figure, date } = tip.data;
+// Videos and the share image are rendered locally (bun run render) and committed under public/.
+const rendered = (file: string) => existsSync(resolve("public", mediaPath(number, file).slice(1)));
+const image = rendered(SHARE.file) ? `${SITE.url}${mediaPath(number, SHARE.file)}` : undefined;
+const published = date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
+const images = IMAGE_SIZES.map((size) => ({ label: SIZES[size].label, size }));
+const videos = VIDEO_SIZES.map((size) => ({
+  label: SIZES[size].label,
+  links: THEMES.filter((theme) => rendered(videoFile(size, theme))).map((theme) => ({
+    theme,
+    href: mediaPath(number, videoFile(size, theme)),
+    name: downloadName(number, size, theme, "mp4"),
+  })),
+})).filter((row) => row.links.length);
+---
+
+<Base title={title} description={body} image={image}>
+  <article class="wrap tip">
+    <div class="plate">
+      <Figure figure={figure} play />
+    </div>
+
+    <div class="side">
+      <div class="text">
+        <TipText tip={tip} heading="h1" />
+        <p class="date mono muted"><time datetime={date.toISOString().slice(0, 10)}>{published}</time></p>
+      </div>
+
+      <section class="downloads" aria-labelledby="downloads" data-figure={figure} data-words={JSON.stringify({ number, title, body })}>
+        <h2 id="downloads" class="mono muted">Download</h2>
+        <div class="group">
+          <p class="group-name">Images <span class="mono muted">PNG</span></p>
+          {
+            images.map((row) => (
+              <div class="row">
+                <span class="mono muted ratio">{row.label}</span>
+                {THEMES.map((theme) => (
+                  <button type="button" class="file mono" data-size={row.size} data-theme-choice={theme}>
+                    {theme === "light" ? "Light" : "Dark"}
+                  </button>
+                ))}
+              </div>
+            ))
+          }
+        </div>
+        {
+          videos.length > 0 && (
+            <div class="group">
+              <p class="group-name">
+                Videos <span class="mono muted">MP4 · 8s</span>
+              </p>
+              {videos.map((row) => (
+                <div class="row">
+                  <span class="mono muted ratio">{row.label}</span>
+                  {row.links.map((link) => (
+                    <a class="file mono" href={link.href} download={link.name}>
+                      {link.theme === "light" ? "Light" : "Dark"}
+                    </a>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )
+        }
+        <p class="license muted">Free for personal use. Please keep the credit line on the image.</p>
+      </section>
+    </div>
+
+    <nav class="pager" aria-label="More tips">
+      {
+        prev ? (
+          <a href={`/${prev.data.number}`} rel="prev" data-key="ArrowLeft">
+            <span class="mono muted">← Previous</span>
+            <span>{prev.data.title}</span>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        next && (
+          <a href={`/${next.data.number}`} rel="next" data-key="ArrowRight" class="next">
+            <span class="mono muted">Next →</span>
+            <span>{next.data.title}</span>
+          </a>
+        )
+      }
+    </nav>
+  </article>
+</Base>
+
+<script>
+  import { composeRest, type Words } from "../lib/compose";
+  import { loadFigure } from "../lib/figure/host";
+  import { downloadName, type Size, type Theme } from "../lib/media";
+
+  const downloads = document.querySelector<HTMLElement>(".downloads")!;
+  const words = JSON.parse(downloads.dataset.words!) as Words;
+
+  downloads.addEventListener("click", async (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-size]");
+    if (!button || button.disabled) return;
+    const size = button.dataset.size as Size;
+    const theme = button.dataset.themeChoice as Theme;
+    button.disabled = true;
+    try {
+      const canvas = await composeRest(await loadFigure(downloads.dataset.figure!), words, size, theme);
+      const blob = await new Promise<Blob | null>((done) => canvas.toBlob(done, "image/png"));
+      if (!blob) throw new Error("Could not make the image");
+      const url = URL.createObjectURL(blob);
+      const link = Object.assign(document.createElement("a"), { href: url, download: downloadName(words.number, size, theme, "png") });
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+    const target = event.target as HTMLElement;
+    if (target.closest("input, textarea, select, [contenteditable]")) return;
+    const link = document.querySelector<HTMLAnchorElement>(`.pager a[data-key="${event.key}"]`);
+    if (link) location.href = link.href;
+  });
+</script>
+
+<style>
+  .tip {
+    display: grid;
+    gap: 32px;
+    padding-top: 24px;
+  }
+  @media (min-width: 900px) {
+    .tip {
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: 48px;
+      align-items: start;
+    }
+    .pager {
+      grid-column: 1 / -1;
+    }
+  }
+  .plate {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .side {
+    display: grid;
+    gap: 40px;
+  }
+  .text {
+    --title-size: clamp(26px, 4vw, 34px);
+    --title-leading: 1.12;
+    --title-tracking: -0.03em;
+    --body-size: 17px;
+    --text-gap: 12px;
+    display: grid;
+    gap: 16px;
+  }
+  .downloads {
+    display: grid;
+    gap: 20px;
+  }
+  .downloads h2 {
+    font-size: 12px;
+    font-weight: 400;
+  }
+  .group {
+    display: grid;
+    gap: 8px;
+  }
+  .group-name {
+    font-weight: 500;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 48px 1fr 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .file {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+  }
+  .file {
+    background: transparent;
+    cursor: pointer;
+  }
+  .file:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .file:disabled {
+    cursor: progress;
+    color: var(--muted);
+  }
+  .license {
+    font-size: 13px;
+  }
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .pager a {
+    display: grid;
+    gap: 4px;
+  }
+  .pager a:hover > span:last-child {
+    color: var(--accent);
+  }
+  .pager .next {
+    text-align: right;
+  }
+</style>

@@ -1,5 +1,5 @@
-User-Agent: *
-Allow: /
+User-agent: *
+Disallow: /render/
+Disallow: /lab/
 
-Host: https://ui.praveenjuge.com
 Sitemap: https://ui.praveenjuge.com/sitemap-index.xml

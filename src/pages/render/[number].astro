@@ -1,0 +1,89 @@
+---
+/**
+ * The page scripts/render.ts drives to make a tip's videos and share image:
+ * /render/12?size=4x5&theme=dark. It mounts the live figure and draws it, with
+ * the words, through the same compositor the tip page uses for downloads.
+ * Not for people, and not in the sitemap.
+ */
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
+import "../../styles/global.css";
+import { pad } from "../../lib/media";
+import { getTips, type Tip } from "../../lib/tips";
+
+export async function getStaticPaths() {
+  return (await getTips()).map((tip) => ({ params: { number: String(tip.data.number) }, props: { tip } }));
+}
+
+interface Props {
+  tip: Tip;
+}
+
+const { number, title, body, figure } = (Astro.props as Props).tip.data;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Render · #{pad(number)}</title>
+    <script is:inline>
+      document.documentElement.dataset.theme =
+        new URLSearchParams(location.search).get("theme") === "dark" ? "dark" : "light";
+    </script>
+  </head>
+  <body>
+    <div class="stage" data-figure={figure} data-words={JSON.stringify({ number, title, body })}></div>
+
+    <script>
+      import { compose, type Words } from "../../lib/compose";
+      import { loadFigure, mountFigure } from "../../lib/figure/host";
+      import { SIZES, type Size, type Theme } from "../../lib/media";
+
+      declare global {
+        interface Window {
+          /** play() starts the tour; frame() draws the figure as it is now and returns a base64 PNG. */
+          render?: { play(): void; frame(): Promise<string> };
+        }
+      }
+
+      const root = document.documentElement;
+      const params = new URLSearchParams(location.search);
+      const size = (params.get("size") ?? "16x9") as Size;
+      if (!(size in SIZES)) throw new Error(`Unknown size ${size}`);
+      const theme = root.dataset.theme as Theme;
+      const stage = document.querySelector<HTMLElement>(".stage")!;
+      const words = JSON.parse(stage.dataset.words!) as Words;
+      const mounted = mountFigure(stage, await loadFigure(stage.dataset.figure!), { interactive: false });
+      const svg = stage.querySelector("svg")!;
+
+      // The kernel only ticks a figure it has seen on screen; say when that has happened.
+      new IntersectionObserver(([entry]) => {
+        if (entry?.isIntersecting) root.dataset.visible = "";
+      }).observe(stage);
+
+      window.render = {
+        play: mounted.play,
+        async frame() {
+          const canvas = await compose({ svg, words, size, theme });
+          return canvas.toDataURL("image/png").slice("data:image/png;base64,".length);
+        },
+      };
+      await document.fonts.ready;
+      root.dataset.ready = "";
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  body {
+    margin: 0;
+    background: var(--bg);
+  }
+  .stage {
+    width: 400px;
+    aspect-ratio: 5 / 4;
+  }
+</style>

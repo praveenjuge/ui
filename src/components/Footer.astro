@@ -1,0 +1,39 @@
+---
+import { SITE } from "../lib/site";
+const year = new Date().getFullYear();
+---
+
+<footer class="wrap">
+  <div class="footer">
+    <p class="muted">
+      © {year} <a href={SITE.authorUrl}>{SITE.author}</a>. Tips and figures are free to download for personal use.
+    </p>
+    <nav class="mono muted links">
+      <a href="/rss.xml">RSS</a>
+      <a href={SITE.repo}>Source</a>
+      <a href={SITE.authorUrl}>praveenjuge.com</a>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    margin-top: 96px;
+    padding-top: 24px;
+    padding-bottom: 40px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .footer a:hover {
+    color: var(--ink);
+  }
+  .links {
+    display: flex;
+    gap: 16px;
+  }
+</style>
