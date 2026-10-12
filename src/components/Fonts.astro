@@ -1,0 +1,11 @@
+---
+/**
+ * Geist and Geist Mono, self-hosted from their npm packages (see the fonts
+ * in astro.config.mjs). Every page loads them, the render and lab pages too,
+ * so a downloaded image is set in the same type on every computer.
+ */
+import { Font } from "astro:assets";
+---
+
+<Font cssVariable="--font-geist" preload />
+<Font cssVariable="--font-geist-mono" />

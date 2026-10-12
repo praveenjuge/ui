@@ -1,0 +1,51 @@
+---
+/** A category's own page, /typography: its intro and its tips, newest first. */
+import Base from "../layouts/Base.astro";
+import TipGrid from "../components/TipGrid.astro";
+import { CATEGORIES, CATEGORY_IDS, categoryPath, type Category } from "../lib/categories";
+import { breadcrumbs, categoryCrumbs, collection } from "../lib/schema";
+import { getTips } from "../lib/tips";
+
+export function getStaticPaths() {
+  return CATEGORY_IDS.map((category) => ({ params: { category } }));
+}
+
+const category = Astro.params.category as Category;
+const { name, intro } = CATEGORIES[category];
+const tips = (await getTips()).filter((tip) => tip.data.category === category).reverse();
+const title = `${name} tips`;
+---
+
+<Base
+  title={title}
+  description={intro}
+  schema={[collection(categoryPath(category), title, intro, tips), breadcrumbs([["UI Tips", "/"], categoryCrumbs(category)])]}
+>
+  <section class="wrap intro">
+    <h1>{title}</h1>
+    <p>{intro}</p>
+  </section>
+
+  <TipGrid tips={tips} current={category} />
+</Base>
+
+<style>
+  .intro {
+    display: grid;
+    gap: 10px;
+    padding-top: 48px;
+    padding-bottom: 40px;
+  }
+  .intro h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+  .intro p {
+    max-width: 56ch;
+    font-size: 16px;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+</style>

@@ -6,11 +6,13 @@
  * Not for people, and not in the sitemap.
  */
 import "../../styles/global.css";
+import Fonts from "../../components/Fonts.astro";
 import { pad } from "../../lib/media";
 import { getTips, type Tip } from "../../lib/tips";
 
 export async function getStaticPaths() {
-  return (await getTips()).map((tip) => ({ params: { number: String(tip.data.number) }, props: { tip } }));
+  // Scheduled tips too: their media is rendered and committed before they go live.
+  return (await getTips({ scheduled: true })).map((tip) => ({ params: { number: String(tip.data.number) }, props: { tip } }));
 }
 
 interface Props {
@@ -27,6 +29,7 @@ const { number, title, body, figure } = (Astro.props as Props).tip.data;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Render · #{pad(number)}</title>
+    <Fonts />
     <script is:inline>
       document.documentElement.dataset.theme =
         new URLSearchParams(location.search).get("theme") === "dark" ? "dark" : "light";
@@ -36,14 +39,17 @@ const { number, title, body, figure } = (Astro.props as Props).tip.data;
     <div class="stage" data-figure={figure} data-words={JSON.stringify({ number, title, body })}></div>
 
     <script>
-      import { compose, type Words } from "../../lib/compose";
+      import { composeFrame, composeRest, type Words } from "../../lib/compose";
       import { loadFigure, mountFigure } from "../../lib/figure/host";
       import { SIZES, type Size, type Theme } from "../../lib/media";
 
       declare global {
         interface Window {
-          /** play() starts the tour; frame() draws the figure as it is now and returns a base64 PNG. */
-          render?: { play(): void; frame(): Promise<string> };
+          /**
+           * play() starts the tour; frame() draws the figure as it is now, for a video; still() draws the
+           * mistake beside the fix, for the share image. Both return a base64 PNG.
+           */
+          render?: { play(): void; frame(): Promise<string>; still(): Promise<string> };
         }
       }
 
@@ -54,7 +60,8 @@ const { number, title, body, figure } = (Astro.props as Props).tip.data;
       const theme = root.dataset.theme as Theme;
       const stage = document.querySelector<HTMLElement>(".stage")!;
       const words = JSON.parse(stage.dataset.words!) as Words;
-      const mounted = mountFigure(stage, await loadFigure(stage.dataset.figure!), { play: false });
+      const figure = await loadFigure(stage.dataset.figure!);
+      const mounted = mountFigure(stage, figure, { play: false });
       const svg = stage.querySelector("svg")!;
 
       // The kernel only ticks a figure it has seen on screen; say when that has happened.
@@ -62,11 +69,15 @@ const { number, title, body, figure } = (Astro.props as Props).tip.data;
         if (entry?.isIntersecting) root.dataset.visible = "";
       }).observe(stage);
 
+      const base64 = (canvas: HTMLCanvasElement) => canvas.toDataURL("image/png").slice("data:image/png;base64,".length);
+
       window.render = {
         play: mounted.play,
         async frame() {
-          const canvas = await compose({ svg, words, size, theme });
-          return canvas.toDataURL("image/png").slice("data:image/png;base64,".length);
+          return base64(await composeFrame({ svg, t: mounted.t, words, size, theme }));
+        },
+        async still() {
+          return base64(await composeRest(figure, words, size, theme));
         },
       };
       await document.fonts.ready;

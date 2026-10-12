@@ -1,0 +1,108 @@
+---
+import Base from "../layouts/Base.astro";
+import { CATEGORIES, CATEGORY_IDS, categoryPath } from "../lib/categories";
+import { breadcrumbs, PERSON_ID } from "../lib/schema";
+import { SITE } from "../lib/site";
+
+const description = `What ${SITE.title} is, who makes it, how the drawings work, and how to share them.`;
+---
+
+<Base
+  title="About"
+  description={description}
+  schema={[
+    {
+      "@type": "AboutPage",
+      name: `About ${SITE.title}`,
+      url: `${SITE.url}/about`,
+      description,
+      mainEntity: { "@id": PERSON_ID },
+    },
+    breadcrumbs([["UI Tips", "/"], ["About", "/about"]]),
+  ]}
+>
+  <article class="wrap about">
+    <h1>About</h1>
+    <div class="prose">
+      <p class="lede">
+        {SITE.title} is a small, daily collection of interface advice. Each tip is one rule, a sentence or two on why, and a drawing
+        that shows the mistake turning into the fix. {SITE.tagline}
+      </p>
+
+      <h2>Who makes it</h2>
+      <p>
+        {SITE.title} is made by <a href={SITE.authorUrl}>{SITE.author}</a>, a designer and developer who works on UI design,
+        accessibility, CSS and design systems. The tips come from the same handful of problems that turn up in almost every design
+        review.
+      </p>
+
+      <h2>What it covers</h2>
+      <ul>
+        {
+          CATEGORY_IDS.map((id) => (
+            <li>
+              <a href={categoryPath(id)}>{CATEGORIES[id].name}</a>: {CATEGORIES[id].covers}.
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2>How the drawings work</h2>
+      <p>
+        Every figure is a flat wireframe drawn in code, as SVG, with one number that runs from 0, the mistake, to 1, the fix. The page
+        plays that change on a loop: the fix, a quick step back to the mistake, then the fix again, slowly. Under the drawing on each tip
+        you can pause it or drag between the two. If your system asks for reduced motion, the drawings hold still on the fix.
+      </p>
+      <p>
+        The motion follows Emil Kowalski's animation rules, and the site is set in Geist and Geist Mono. The code is open source on{" "}
+        <a href={SITE.repo}>GitHub</a>.
+      </p>
+
+      <h2>Share them</h2>
+      <p>
+        Every tip downloads as an image (1:1, 4:5, 9:16 and 16:9) or a video, in light or dark. They're free to share: credit{" "}
+        {SITE.title} and link back to the tip, so people can find the rest.
+      </p>
+
+      <h2>Follow along</h2>
+      <p>
+        A new tip goes up every day. Follow on{" "}
+        {
+          SITE.follow.map((link, i) => (
+            <>
+              <a href={link.url} rel="me">{link.label}</a>
+              {i < SITE.follow.length - 2 ? ", " : i === SITE.follow.length - 2 ? " or " : ""}
+            </>
+          ))
+        }
+        , or subscribe to the <a href="/rss.xml">RSS feed</a>.
+      </p>
+
+      <h2>For machines</h2>
+      <p>
+        Every tip is also plain Markdown: add <code>.md</code> to its address, like{" "}
+        <a href="/1/touch-target-size.md"><code>/1/touch-target-size.md</code></a>.{" "}
+        <a href="/llms.txt"><code>/llms.txt</code></a> lists them all.
+      </p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .about {
+    display: grid;
+    gap: 20px;
+    max-width: 720px;
+    padding-top: 48px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+  .lede {
+    font-size: 17px;
+    color: var(--muted);
+  }
+</style>

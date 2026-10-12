@@ -1,0 +1,143 @@
+---
+/**
+ * The site's own share image, 1920 × 1080, for the pages that have none of
+ * their own: the home page, the categories, about. scripts/render.ts
+ * photographs it to public/og.png. Not for people, and not in the sitemap.
+ */
+import "../../styles/global.css";
+import Fonts from "../../components/Fonts.astro";
+import Logo from "../../components/Logo.astro";
+import { STILL_VIEWBOX, getFigure, stillMarkup } from "../../lib/figure/still";
+import { SITE } from "../../lib/site";
+
+// Two figures, each as the mistake and the fix.
+const pairs = ["contrast", "action"].map((name) => getFigure(name));
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Render · site</title>
+    <Fonts />
+  </head>
+  <body>
+    <header>
+      <Logo size={64} />
+      <span class="name">{SITE.title}</span>
+      <span class="by">by {SITE.author}</span>
+      <span class="host">{SITE.host}</span>
+    </header>
+    <h1>Small UI tips, one a day.</h1>
+    <p class="tagline">{SITE.tagline}</p>
+    <div class="row">
+      {
+        pairs.map((figure) => (
+          <div class="pair">
+            <figure>
+              <figcaption>✕ Mistake</figcaption>
+              <div class="plate">
+                <svg class="figure-svg" viewBox={STILL_VIEWBOX} set:html={stillMarkup(figure, 0)} />
+              </div>
+            </figure>
+            <figure class="fix">
+              <figcaption>✓ Fix</figcaption>
+              <div class="plate">
+                <svg class="figure-svg" viewBox={STILL_VIEWBOX} set:html={stillMarkup(figure, 1)} />
+              </div>
+            </figure>
+          </div>
+        ))
+      }
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  html,
+  body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+  }
+  body {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 88px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 40px;
+    letter-spacing: -0.01em;
+  }
+  .name {
+    font-weight: 600;
+  }
+  .by {
+    margin-left: -8px;
+    color: var(--muted);
+  }
+  .host {
+    margin-left: auto;
+    font: 28px var(--mono);
+    color: var(--muted);
+  }
+  h1 {
+    margin: 72px 0 0;
+    font-size: 112px;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+  }
+  .tagline {
+    margin: 24px 0 0;
+    font-size: 48px;
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+  .row {
+    display: flex;
+    gap: 48px;
+    margin-top: auto;
+  }
+  .pair {
+    display: flex;
+    flex: 1;
+    gap: 16px;
+  }
+  figure {
+    flex: 1;
+    margin: 0;
+  }
+  figcaption {
+    margin-bottom: 12px;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .fix figcaption {
+    color: var(--accent);
+  }
+  .plate {
+    border: 2px solid var(--line-strong);
+    border-radius: 18px;
+  }
+  .fix .plate {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--bg));
+  }
+  .plate svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 4;
+  }
+</style>

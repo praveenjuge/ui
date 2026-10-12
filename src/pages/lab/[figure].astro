@@ -6,6 +6,7 @@
  * checks it. Not for readers, and not in the sitemap.
  */
 import "../../styles/global.css";
+import Fonts from "../../components/Fonts.astro";
 
 export function getStaticPaths() {
   return Object.keys(import.meta.glob("../../figures/*.ts")).map((path) => ({
@@ -28,6 +29,7 @@ const STATES = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Lab · {figure}</title>
+    <Fonts />
   </head>
   <body data-figure={figure}>
     <h1 class="mono">{figure}</h1>

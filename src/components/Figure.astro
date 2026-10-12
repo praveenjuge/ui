@@ -1,10 +1,13 @@
 ---
 /**
- * A tip's figure on a stage, playing its lesson on a loop. The figure's file
- * is imported only when this element mounts it: at once, or, with `lazy`,
- * when it nears the viewport (and it is torn down again when it leaves, so a
- * long grid stays light).
+ * A tip's figure on a stage, playing its lesson on a loop. The stage ships
+ * with the figure's still, drawn at build time, so the drawing shows before
+ * any script runs. The figure's file is imported only when this element
+ * mounts it: at once, or, with `lazy`, when it nears the viewport (and it is
+ * torn down again when it leaves, so a long grid stays light).
  */
+import { STILL_VIEWBOX, getFigure, stillMarkup } from "../lib/figure/still";
+
 interface Props {
   figure: string;
   lazy?: boolean;
@@ -12,6 +15,7 @@ interface Props {
 }
 
 const { figure, lazy = false, class: className } = Astro.props;
+const loaded = getFigure(figure);
 ---
 
 <tip-figure
@@ -19,7 +23,9 @@ const { figure, lazy = false, class: className } = Astro.props;
   data-figure={figure}
   data-lazy={lazy ? "" : undefined}
 >
-  <div class="stage"></div>
+  <div class="stage" role="img" aria-label={loaded.means}>
+    <svg class="figure-svg" viewBox={STILL_VIEWBOX} aria-hidden="true" data-still set:html={stillMarkup(loaded)} />
+  </div>
 </tip-figure>
 
 <script>
@@ -29,6 +35,11 @@ const { figure, lazy = false, class: className } = Astro.props;
     #mounted: Mounted | undefined;
     #io: IntersectionObserver | undefined;
     #generation = 0;
+
+    /** The live figure, once mounted; the tip page's scrubber drives it. */
+    get mounted() {
+      return this.#mounted;
+    }
 
     connectedCallback() {
       if (!this.hasAttribute("data-lazy")) return void this.#mount();
@@ -50,8 +61,11 @@ const { figure, lazy = false, class: className } = Astro.props;
       const figure = await loadFigure(this.dataset.figure ?? "");
       if (generation !== this.#generation || this.#mounted) return;
       const stage = this.querySelector<HTMLElement>(".stage")!;
-      this.#mounted = mountFigure(stage, figure);
+      this.#mounted = mountFigure(stage, figure, {
+        onShow: (t) => this.dispatchEvent(new CustomEvent("figure-show", { detail: t })),
+      });
       this.dataset.mounted = "";
+      this.dispatchEvent(new CustomEvent("figure-mount"));
     }
 
     #unmount() {

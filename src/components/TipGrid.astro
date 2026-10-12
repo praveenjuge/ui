@@ -1,0 +1,195 @@
+---
+/**
+ * The list of tips with its controls: links to each category's page, and a
+ * search that filters the cards on this page as you type. The home page and
+ * the category pages share it.
+ */
+import TipCard from "./TipCard.astro";
+import { CATEGORIES, CATEGORY_IDS, categoryPath, type Category } from "../lib/categories";
+import type { Tip } from "../lib/tips";
+
+interface Props {
+  tips: Tip[];
+  /** The category this page shows, or none for all of them. */
+  current?: Category;
+}
+
+const { tips, current } = Astro.props;
+const links = [
+  { href: "/", label: "All", here: !current },
+  ...CATEGORY_IDS.map((id) => ({ href: categoryPath(id), label: CATEGORIES[id].name, here: id === current })),
+];
+---
+
+<section class="wrap controls">
+  <nav class="chips" aria-label="Categories">
+    {
+      links.map((link) => (
+        <a href={link.href} class="chip" aria-current={link.here ? "page" : undefined}>
+          {link.label}
+        </a>
+      ))
+    }
+  </nav>
+  <div class="search" role="search">
+    <label for="search" class="visually-hidden">Search tips</label>
+    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
+    <input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false" aria-keyshortcuts="Control+K Meta+K" />
+    <kbd class="hint" id="search-hint" aria-hidden="true" hidden></kbd>
+  </div>
+</section>
+
+<section class="wrap grid" id="grid" aria-label="Tips">
+  {tips.map((tip) => <TipCard tip={tip} />)}
+</section>
+<p class="wrap empty" id="empty" hidden>No tips match that.</p>
+<p class="visually-hidden" id="search-status" role="status"></p>
+
+<script>
+  const cards = [...document.querySelectorAll<HTMLElement>("#grid .card")];
+  const input = document.getElementById("search") as HTMLInputElement;
+  const hint = document.getElementById("search-hint")!;
+  const empty = document.getElementById("empty")!;
+  const status = document.getElementById("search-status")!;
+  input.value = new URLSearchParams(location.search).get("q") ?? "";
+
+  const mac = /mac|iphone|ipad/i.test((navigator as { userAgentData?: { platform: string } }).userAgentData?.platform ?? navigator.platform);
+  hint.textContent = mac ? "⌘K" : "Ctrl K";
+  const showHint = () => (hint.hidden = !matchMedia("(hover: hover) and (pointer: fine)").matches || !!input.value || document.activeElement === input);
+
+  let announce = 0;
+  function apply() {
+    const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const card of cards) {
+      const match = words.every((word) => card.dataset.search!.includes(word));
+      card.hidden = !match;
+      if (match) shown++;
+    }
+    empty.hidden = shown > 0;
+    showHint();
+
+    // Say how many match once typing settles, rather than on every key.
+    clearTimeout(announce);
+    announce = window.setTimeout(() => {
+      status.textContent = !words.length ? "" : shown ? `${shown} ${shown === 1 ? "tip" : "tips"}` : "No tips match that.";
+    }, 500);
+
+    const url = new URL(location.href);
+    input.value ? url.searchParams.set("q", input.value) : url.searchParams.delete("q");
+    history.replaceState(null, "", url);
+  }
+
+  input.addEventListener("input", apply);
+  input.addEventListener("focus", showHint);
+  input.addEventListener("blur", showHint);
+  // ⌘K or Ctrl K: a shortcut with a modifier, so typing a slash or a letter anywhere never steals focus.
+  document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      input.focus();
+      input.select();
+    }
+  });
+  apply();
+</script>
+
+<style>
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target);
+    padding: 0 12px;
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 13px;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      transform 160ms var(--ease-out);
+  }
+  .chip:active {
+    transform: scale(0.97);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .chip:hover {
+      color: var(--ink);
+    }
+  }
+  .chip[aria-current="page"] {
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .search {
+    position: relative;
+    flex: 0 1 220px;
+  }
+  .search svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    translate: 0 -50%;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+  .search input {
+    width: 100%;
+    height: var(--target);
+    padding: 0 52px 0 31px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg);
+    font-size: 13px;
+    transition: border-color 150ms ease;
+  }
+  .search input::placeholder {
+    color: var(--muted);
+  }
+  /* The focus ring stays (global.css); the border darkens with it. */
+  .search input:focus {
+    border-color: var(--line-strong);
+  }
+  .hint {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    translate: 0 -50%;
+    padding: 4px 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+  @media (max-width: 560px) {
+    .search {
+      flex-basis: 100%;
+    }
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: 40px 24px;
+  }
+  .empty {
+    padding-top: 24px;
+    color: var(--muted);
+  }
+</style>
