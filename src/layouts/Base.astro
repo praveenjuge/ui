@@ -1,20 +1,34 @@
 ---
 import "../styles/global.css";
+import Fonts from "../components/Fonts.astro";
 import Footer from "../components/Footer.astro";
+import Logo from "../components/Logo.astro";
+import { person, website } from "../lib/schema";
 import { SITE } from "../lib/site";
 
 interface Props {
+  /** The page's own title; the document title adds `series` after it. Leave it out on the home page. */
   title?: string;
+  /** What follows the title in the document title: the site's name, or a tip's "UI Tip #012". */
+  series?: string;
   description?: string;
-  /** Absolute URL of the share image. */
-  image?: string;
+  /** The share image, absolute, with its alt text. Pages without their own share the site's. */
+  image?: { url: string; alt: string };
+  /** For a tip: when it was published and which category it is in. */
+  article?: { published: Date; section: string };
+  /** The address of the page's markdown version. */
+  markdown?: string;
+  /** Structured data for the page, on top of the site and its author. */
+  schema?: object[];
 }
 
-const { title, description = SITE.description, image } = Astro.props;
-const fullTitle = title ? `${title} · ${SITE.title}` : `${SITE.title} by ${SITE.author}`;
-// Pages build to /12.html but are served at /12.
+const { title, series = SITE.title, description = SITE.description, article, markdown, schema = [] } = Astro.props;
+const image = Astro.props.image ?? { url: `${SITE.url}/og.png`, alt: `${SITE.brand}. ${SITE.tagline}` };
+const fullTitle = title ? `${title} · ${series}` : `${SITE.brand} · Daily UI and UX design tips`;
+// Pages build to /12/slug.html but are served at /12/slug.
 const path = Astro.url.pathname.replace(/(index)?\.html$/, "").replace(/(.)\/$/, "$1");
 const canonical = new URL(path, SITE.url).href;
+const graph = { "@context": "https://schema.org", "@graph": [website, person, ...schema] };
 ---
 
 <!doctype html>
@@ -24,21 +38,36 @@ const canonical = new URL(path, SITE.url).href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <meta name="author" content={SITE.author} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <Fonts />
+    <link rel="alternate" type="application/rss+xml" title={SITE.brand} href="/rss.xml" />
+    {markdown && <link rel="alternate" type="text/markdown" href={markdown} />}
+    <link rel="sitemap" href="/sitemap.xml" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
-    <meta property="og:type" content={image ? "article" : "website"} />
-    <meta property="og:site_name" content={SITE.title} />
-    <meta property="og:title" content={title ?? SITE.title} />
+    <meta property="og:type" content={article ? "article" : "website"} />
+    <meta property="og:site_name" content={SITE.brand} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={title ?? SITE.brand} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    {image && <meta property="og:image" content={image} />}
-    {image && <meta property="og:image:width" content="1920" />}
-    {image && <meta property="og:image:height" content="1080" />}
-    <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
+    <meta property="og:image" content={image.url} />
+    <meta property="og:image:width" content="1920" />
+    <meta property="og:image:height" content="1080" />
+    <meta property="og:image:alt" content={image.alt} />
+    {article && <meta property="article:published_time" content={article.published.toISOString()} />}
+    {article && <meta property="article:section" content={article.section} />}
+    {article && <meta property="article:author" content={SITE.authorUrl} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={SITE.x} />
+    <meta name="twitter:creator" content={SITE.x} />
+    <meta name="twitter:image:alt" content={image.alt} />
+    <script type="application/ld+json" set:html={JSON.stringify(graph).replace(/</g, "\\u003c")} />
     <script is:inline>
       try {
         const theme = localStorage.getItem("theme");
@@ -49,9 +78,13 @@ const canonical = new URL(path, SITE.url).href;
   <body>
     <header class="wrap header">
       <a href="/" class="brand">
-        <span class="mark" aria-hidden="true"></span>
+        <Logo size={22} />
         <span>{SITE.title}</span>
+        <span class="by">by {SITE.author}</span>
       </a>
+      <nav aria-label="Site">
+        <a href="/about" aria-current={path === "/about" ? "page" : undefined}>About</a>
+      </nav>
     </header>
     <main>
       <slot />
@@ -64,27 +97,43 @@ const canonical = new URL(path, SITE.url).href;
   .header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     height: 64px;
   }
   .brand {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
+    min-height: var(--target);
     font-weight: 600;
     letter-spacing: -0.01em;
   }
-  .mark {
-    width: 16px;
-    height: 16px;
-    border: 1.5px solid var(--ink);
-    border-radius: 5px;
-    position: relative;
+  .by {
+    margin-left: -3px;
+    font-weight: 400;
+    color: var(--muted);
   }
-  .mark::after {
-    content: "";
-    position: absolute;
-    inset: 3.5px;
-    border-radius: 50%;
-    background: var(--accent);
+  @media (max-width: 380px) {
+    .by {
+      display: none;
+    }
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target);
+    padding: 0 4px;
+    font-size: 14px;
+    color: var(--muted);
+    transition: color 150ms ease;
+  }
+  nav a[aria-current="page"] {
+    color: var(--ink);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    nav a:hover {
+      color: var(--ink);
+    }
   }
 </style>

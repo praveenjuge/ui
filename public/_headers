@@ -1,0 +1,4 @@
+# A tip's Markdown version points search engines at its page, so the two never compete.
+/*.md
+  Link: <https://ui.praveenjuge.com/:splat>; rel="canonical"
+  Content-Type: text/markdown; charset=utf-8

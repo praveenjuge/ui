@@ -108,7 +108,8 @@ export interface Draw {
 }
 
 function shape<P extends object>(parent: Element, tag: string, props: P, attrs: (p: P) => Attrs): Shape<P> {
-  const el = document.createElementNS(NS, tag) as SVGElement;
+  // The parent's document, not the global one, so ./still can draw a figure at build time.
+  const el = parent.ownerDocument.createElementNS(NS, tag) as SVGElement;
   parent.append(el);
   const state = { ...props };
   const written: Record<string, string> = {};

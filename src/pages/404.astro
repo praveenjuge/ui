@@ -1,12 +1,17 @@
 ---
 import Base from "../layouts/Base.astro";
+import TipCard from "../components/TipCard.astro";
+import { getTips } from "../lib/tips";
+
+const latest = (await getTips()).at(-1);
 ---
 
 <Base title="Not found">
   <section class="wrap missing">
     <p class="mono accent">404</p>
     <h1>There's no tip here.</h1>
-    <p class="muted">It may not be published yet. <a href="/">See all tips</a>.</p>
+    <p class="muted">It may not be published yet. <a href="/">See all tips</a>, or start with the newest:</p>
+    {latest && <div class="latest"><TipCard tip={latest} /></div>}
   </section>
 </Base>
 
@@ -21,7 +26,13 @@ import Base from "../layouts/Base.astro";
     font-weight: 600;
     letter-spacing: -0.03em;
   }
-  a {
+  .missing > p a {
     color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .latest {
+    max-width: 360px;
+    margin-top: 20px;
   }
 </style>

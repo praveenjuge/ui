@@ -11,7 +11,10 @@
  * Time moves t linearly between those holds; each figure eases its own parts
  * (see `ease` and `stagger` in ./index). One requestAnimationFrame loop runs
  * every figure on the page and skips the ones off screen. Under reduced
- * motion the figure stays on the fix.
+ * motion the figure stays on the fix, unless someone presses play.
+ *
+ * A stage can hold the figure's still (see ./still), drawn at build time; the
+ * live figure takes its place while mounted and gives it back when it goes.
  */
 import { createDraw } from "./draw";
 import { LAP_MS, VIEW, type Figure } from "./index";
@@ -41,6 +44,14 @@ function tAt(ms: number): number {
   return 1;
 }
 
+/** The first point in the lap's slow fix that shows `t`, or its start for the fix itself. */
+function lapAt(t: number): number {
+  if (!(t < 1)) return 0;
+  const [a, ta] = LAP[3]!;
+  const [b, tb] = LAP[4]!;
+  return a + (b - a) * ((Math.max(0, t) - ta) / (tb - ta));
+}
+
 const modules = import.meta.glob<{ default: Figure }>("../../figures/*.ts");
 
 /** Loads src/figures/<name>.ts. */
@@ -58,6 +69,8 @@ interface Board {
   rest(): void;
   visible: boolean;
   playing: boolean;
+  /** Someone pressed play: run the loop even under reduced motion. */
+  chosen: boolean;
 }
 
 const boards = new Map<Element, Board>();
@@ -74,7 +87,7 @@ function frame(now: number) {
   let any = false;
   for (const board of boards.values()) {
     if (!board.visible || !board.playing) continue;
-    if (reduced()) {
+    if (reduced() && !board.chosen) {
       board.rest();
       continue;
     }
@@ -116,19 +129,36 @@ export interface MountOptions {
   play?: boolean;
   /** Where the figure holds when it isn't playing: 1 the fix (the default), 0 the mistake. */
   at?: number;
+  /** Called with t whenever the figure shows a new one. */
+  onShow?: (t: number) => void;
 }
 
 export interface Mounted {
   figure: Figure;
   svg: SVGSVGElement;
+  /** Where the figure is: 0 the mistake, 1 the fix. */
+  readonly t: number;
+  /** Whether the loop is running. */
+  readonly playing: boolean;
   /** Starts the lap from its first frame. */
   play(): void;
+  /** Runs the loop again from where it stopped; `chosen` plays it even under reduced motion. */
+  resume(options?: { chosen?: boolean }): void;
+  /** Stops the loop where it is. */
+  pause(): void;
+  /** Stops the loop and shows `t`. */
+  seek(t: number): void;
   destroy(): void;
 }
 
+/** Whether the figures should hold still: the system asks for reduced motion. */
+export const prefersReducedMotion = reduced;
+
 /** Mounts a loaded figure into an empty stage. */
 export function mountFigure(stage: HTMLElement, figure: Figure, options: MountOptions = {}): Mounted {
-  const { play = true, at = 1 } = options;
+  const { play = true, at = 1, onShow } = options;
+  const still = stage.querySelector<SVGSVGElement>(":scope > svg[data-still]");
+  still?.remove();
   const svg = document.createElementNS(NS, "svg");
   svg.setAttribute("viewBox", `0 0 ${VIEW.width} ${VIEW.height}`);
   svg.setAttribute("class", "figure-svg");
@@ -143,6 +173,7 @@ export function mountFigure(stage: HTMLElement, figure: Figure, options: MountOp
     if (t === shown) return;
     shown = t;
     showFigure(t);
+    onShow?.(t);
   };
   show(at);
 
@@ -150,6 +181,7 @@ export function mountFigure(stage: HTMLElement, figure: Figure, options: MountOp
   const board: Board = {
     visible: false,
     playing: play,
+    chosen: false,
     tick(dt) {
       elapsed = (elapsed + dt) % LAP_MS;
       show(tAt(elapsed));
@@ -164,15 +196,36 @@ export function mountFigure(stage: HTMLElement, figure: Figure, options: MountOp
   return {
     figure,
     svg,
+    get t() {
+      return shown;
+    },
+    get playing() {
+      return board.playing;
+    },
     play() {
       elapsed = 0;
       board.playing = true;
       show(1);
       wake();
     },
+    resume({ chosen = false } = {}) {
+      board.chosen ||= chosen;
+      // Pick the lap up at the point that shows the current t, so play continues from the scrubber.
+      elapsed = lapAt(shown);
+      board.playing = true;
+      wake();
+    },
+    pause() {
+      board.playing = false;
+    },
+    seek(t) {
+      board.playing = false;
+      show(t);
+    },
     destroy() {
       unwatch(stage);
       svg.remove();
+      if (still) stage.append(still);
     },
   };
 }

@@ -39,8 +39,8 @@ One screen, a few parts. It must read at 240px wide, the size of a card on the h
 One line each, then build it:
 
 - **Interface:** what's on screen.
-- **Mistake (t = 0):** what's wrong, visibly. It's held for two seconds, so it has to read on its own.
-- **Fix (t = 1):** what's right. This is the rest pose: the thumbnail, the share image, and the video's first and last frame.
+- **Mistake (t = 0):** what's wrong, visibly. It's held for two seconds, and the share image and image downloads show it on its own plate beside the fix, so it has to read on its own.
+- **Fix (t = 1):** what's right. This is the rest pose: the thumbnail, the still the page ships before its script runs, the fix plate in the share image, and the video's first and last frame.
 - **Measurement:** the annotation that says the rule: a dimension line with its value, a pair of gap markers, a dashed guide, a count. It changes with `t`.
 - **Accent:** the one thing in blue: the element the tip is about, and its measurement.
 
@@ -81,7 +81,7 @@ Then open `/lab/<name>` in `bun run dev` and watch the live loop at least twice.
 
 ## 6. Ship
 
-Run `bun run render`. It renders the tip's four videos and share image into `public/media/<number>/`. Commit them with the tip and the figure.
+Run `bun run render`. It renders the tip's four videos and share image (the mistake beside the fix) into `public/media/<number>/`. Commit them with the tip and the figure.
 
 ## What goes wrong
 

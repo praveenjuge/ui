@@ -1,0 +1,42 @@
+# Publishes scheduled tips. A tip dated after the day of a build stays off the
+# site (src/lib/tips.ts), so a tip can be written, rendered and pushed ahead of
+# time. Just after midnight UTC, this checks whether any tip is dated today and,
+# if one is, rebuilds the site through a Workers Builds deploy hook, which puts
+# it live.
+#
+# Setup: in the Cloudflare dashboard, open the ui Worker, then Settings > Builds >
+# Deploy Hooks, and create a hook for main. Save its URL as the repository secret
+# CLOUDFLARE_DEPLOY_HOOK. Without it, this job does nothing but warn.
+name: Publish scheduled tips
+
+on:
+  schedule:
+    - cron: "5 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: src/content/tips
+
+      - name: Rebuild if a tip is dated today
+        env:
+          DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          today=$(date -u +%F)
+          if [ "$FORCE" != "true" ] && ! grep -lq "^date: $today$" src/content/tips/*.md; then
+            echo "No tip is dated $today."
+            exit 0
+          fi
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "::warning::A tip is dated $today, but the CLOUDFLARE_DEPLOY_HOOK secret isn't set, so it won't go live until the next push."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error -X POST "$DEPLOY_HOOK"

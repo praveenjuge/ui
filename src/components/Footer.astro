@@ -11,10 +11,11 @@ const THEMES = [
 <footer class="wrap">
   <div class="footer">
     <p class="muted">
-      © {year} <a href={SITE.authorUrl}>{SITE.author}</a>. Free to download for personal use.
+      © {year} <a href={SITE.authorUrl}>{SITE.author}</a>. Free to share, with a link back.
     </p>
     <div class="end">
-      <nav class="links" aria-label="Elsewhere">
+      <nav class="links" aria-label="Follow">
+        {SITE.follow.map((link) => <a href={link.url} rel="me">{link.label}</a>)}
         <a href="/rss.xml">RSS</a>
         <a href={SITE.repo}>Source</a>
       </nav>
@@ -85,15 +86,20 @@ const THEMES = [
   }
   .end {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 20px;
+    gap: 8px 20px;
   }
   .links {
     display: flex;
-    gap: 16px;
+    flex-wrap: wrap;
+    column-gap: 16px;
     color: var(--muted);
   }
   .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target);
     transition: color 150ms ease;
   }
   @media (hover: hover) and (pointer: fine) {
@@ -111,8 +117,8 @@ const THEMES = [
   .theme button {
     display: grid;
     place-items: center;
-    width: 26px;
-    height: 26px;
+    width: var(--target);
+    height: var(--target);
     padding: 0;
     border: 0;
     border-radius: 999px;

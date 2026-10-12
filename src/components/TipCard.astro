@@ -1,24 +1,25 @@
 ---
 import Figure from "./Figure.astro";
 import { CATEGORIES } from "../lib/categories";
-import { pad } from "../lib/media";
-import type { Tip } from "../lib/tips";
+import { tipPath, type Tip } from "../lib/tips";
 
 interface Props {
   tip: Tip;
+  /** The title's heading level: h2 in a page's grid, h3 under a section's own heading. */
+  heading?: "h2" | "h3";
 }
 
-const { tip } = Astro.props;
-const { number, title, body, category, figure } = tip.data;
-const search = [title, body, CATEGORIES[category]].join(" ").toLowerCase();
+const { tip, heading: Heading = "h2" } = Astro.props;
+const { title, body, category, figure } = tip.data;
+const search = [title, body, CATEGORIES[category].name].join(" ").toLowerCase();
 ---
 
-<a href={`/${number}`} class="card" data-category={category} data-search={search}>
+<a href={tipPath(tip)} class="card" data-category={category} data-search={search}>
   <div class="plate">
     <Figure figure={figure} lazy />
   </div>
-  <p class="meta"><span class="number">{pad(number)}</span>{CATEGORIES[category]}</p>
-  <h2 class="title">{title}</h2>
+  <Heading class="title">{title}</Heading>
+  <p class="body">{body}</p>
 </a>
 
 <style>
@@ -42,22 +43,22 @@ const search = [title, body, CATEGORIES[category]].join(" ").toLowerCase();
       border-color: var(--line-strong);
     }
   }
-  .meta {
-    display: flex;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .number {
-    font-family: var(--mono);
-    color: var(--accent);
-    font-variant-numeric: tabular-nums;
-  }
   .title {
     font-size: 15px;
     font-weight: 600;
     line-height: 1.35;
     letter-spacing: -0.01em;
     text-wrap: balance;
+  }
+  /* Two lines of the tip, cut with an ellipsis; the page has the rest. */
+  .body {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--muted);
   }
 </style>

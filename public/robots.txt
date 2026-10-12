@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /render/
 Disallow: /lab/
 
-Sitemap: https://ui.praveenjuge.com/sitemap-index.xml
+Sitemap: https://ui.praveenjuge.com/sitemap.xml
