@@ -10,18 +10,15 @@ const tips = (await getTips()).reverse();
 <Base>
   <section class="wrap intro">
     <h1>Small UI tips, one a day.</h1>
-    <p class="muted">
-      Short, numbered notes on layout, type, forms and accessibility. Each one has a line drawing you can poke at, and
-      images and videos you can download.
-    </p>
+    <p>Short notes on layout, type, forms and accessibility, each shown as the mistake and the fix.</p>
   </section>
 
   <section class="wrap controls" aria-label="Filter tips">
     <div class="chips" role="group" aria-label="Category">
-      <button type="button" class="chip mono" data-category="" aria-pressed="true">All</button>
+      <button type="button" class="chip" data-category="" aria-pressed="true">All</button>
       {
         CATEGORY_IDS.map((id) => (
-          <button type="button" class="chip mono" data-category={id} aria-pressed="false">
+          <button type="button" class="chip" data-category={id} aria-pressed="false">
             {CATEGORIES[id]}
           </button>
         ))
@@ -29,6 +26,7 @@ const tips = (await getTips()).reverse();
     </div>
     <label class="search">
       <span class="visually-hidden">Search tips</span>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
       <input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false" />
     </label>
   </section>
@@ -36,7 +34,7 @@ const tips = (await getTips()).reverse();
   <section class="wrap grid" id="grid">
     {tips.map((tip) => <TipCard tip={tip} />)}
   </section>
-  <p class="wrap empty muted" id="empty" hidden>No tips match that. Try another word or category.</p>
+  <p class="wrap empty" id="empty" hidden>No tips match that.</p>
 </Base>
 
 <script>
@@ -86,19 +84,20 @@ const tips = (await getTips()).reverse();
 <style>
   .intro {
     display: grid;
-    gap: 12px;
-    padding-top: 56px;
+    gap: 10px;
+    padding-top: 48px;
     padding-bottom: 40px;
   }
   .intro h1 {
-    font-size: clamp(30px, 6vw, 48px);
-    line-height: 1.08;
-    font-weight: 560;
-    letter-spacing: -0.035em;
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.03em;
   }
   .intro p {
-    max-width: 52ch;
+    max-width: 46ch;
     font-size: 16px;
+    color: var(--muted);
   }
   .controls {
     display: flex;
@@ -106,59 +105,85 @@ const tips = (await getTips()).reverse();
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 28px;
   }
   .chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 4px;
   }
   .chip {
-    height: 32px;
+    height: 30px;
     padding: 0 12px;
-    border: 1px solid var(--line);
+    border: 0;
     border-radius: 999px;
     background: transparent;
     color: var(--muted);
+    font-size: 13px;
     cursor: pointer;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      transform 160ms var(--ease-out);
   }
-  .chip:hover {
-    color: var(--ink);
-    border-color: var(--muted);
+  .chip:active {
+    transform: scale(0.97);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .chip:hover {
+      color: var(--ink);
+    }
   }
   .chip[aria-pressed="true"] {
-    background: var(--accent-soft);
-    border-color: transparent;
-    color: var(--accent);
+    background: var(--surface);
+    color: var(--ink);
   }
   .search {
-    flex: 1 1 200px;
-    max-width: 280px;
+    position: relative;
+    flex: 0 1 220px;
+  }
+  .search svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    translate: 0 -50%;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    pointer-events: none;
   }
   .search input {
     width: 100%;
-    height: 36px;
-    padding: 0 12px;
+    height: 32px;
+    padding: 0 12px 0 30px;
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 999px;
     background: var(--bg);
-    font-size: 14px;
+    font-size: 13px;
+    transition: border-color 150ms ease;
+  }
+  .search input::placeholder {
+    color: var(--muted);
   }
   .search input:focus {
     outline: none;
-    border-color: var(--accent);
+    border-color: var(--line-strong);
   }
   @media (max-width: 560px) {
     .search {
-      max-width: none;
+      flex-basis: 100%;
     }
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+    gap: 40px 24px;
   }
   .empty {
-    padding-top: 32px;
+    padding-top: 24px;
+    color: var(--muted);
   }
 </style>

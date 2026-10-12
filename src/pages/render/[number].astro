@@ -5,8 +5,6 @@
  * the words, through the same compositor the tip page uses for downloads.
  * Not for people, and not in the sitemap.
  */
-import "@fontsource-variable/geist";
-import "@fontsource-variable/geist-mono";
 import "../../styles/global.css";
 import { pad } from "../../lib/media";
 import { getTips, type Tip } from "../../lib/tips";
@@ -56,7 +54,7 @@ const { number, title, body, figure } = (Astro.props as Props).tip.data;
       const theme = root.dataset.theme as Theme;
       const stage = document.querySelector<HTMLElement>(".stage")!;
       const words = JSON.parse(stage.dataset.words!) as Words;
-      const mounted = mountFigure(stage, await loadFigure(stage.dataset.figure!), { interactive: false });
+      const mounted = mountFigure(stage, await loadFigure(stage.dataset.figure!), { play: false });
       const svg = stage.querySelector("svg")!;
 
       // The kernel only ticks a figure it has seen on screen; say when that has happened.

@@ -7,10 +7,12 @@
 [data-theme="light"] {
   color-scheme: light;
   --bg: #ffffff;
-  --surface: #f6f6f8;
+  --surface: #f4f4f6;
   --ink: #141418;
   --muted: #6c6c75;
-  --line: #e4e4e9;
+  --line: #e8e8ec;
+  --line-strong: #d2d2d8;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -8px rgb(0 0 0 / 0.14);
   --accent: #2448ff;
   --accent-soft: #e9edff;
   /*
@@ -31,7 +33,9 @@
     --surface: #111114;
     --ink: #ececf1;
     --muted: #8b8c96;
-    --line: #26262c;
+    --line: #222228;
+    --line-strong: #33333a;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.6);
     --accent: #7590ff;
     --accent-soft: #161c3a;
     --fig-frame: #45464e;
@@ -48,7 +52,9 @@
   --surface: #111114;
   --ink: #ececf1;
   --muted: #8b8c96;
-  --line: #26262c;
+  --line: #222228;
+  --line-strong: #33333a;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.6);
   --accent: #7590ff;
   --accent-soft: #161c3a;
   --fig-frame: #45464e;
@@ -129,8 +135,11 @@
 }
 
 :root {
-  --sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
-  --mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Motion, from Emil Kowalski's rules (.claude/skills/emil-design-eng). */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   --radius: 14px;
   --gutter: 16px;
   --max: 1120px;

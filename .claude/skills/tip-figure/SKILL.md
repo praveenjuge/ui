@@ -6,7 +6,17 @@ argument-hint: "[tip number or title]"
 
 # Tip figure
 
-Every tip on ui.praveenjuge.com has one figure: a flat wireframe of the interface the tip is about, drawn in thin lines, with the one thing the tip is about in the electric-blue accent. It has one number, `t`. At `t = 0` the interface makes the mistake the tip warns about; at `t = 1` it follows the tip. The pointer's x across the figure scrubs `t`, and the figure rests on the fix. The same file becomes the tip page's figure, its share image, its downloads and its 8-second video, so you draw it once.
+Every tip on ui.praveenjuge.com has one figure: a flat wireframe of the interface the tip is about, drawn in thin lines, with the one thing the tip is about in the electric-blue accent. It has one number, `t`. At `t = 0` the interface makes the mistake the tip warns about; at `t = 1` it follows the tip.
+
+The host plays the lesson on a loop, everywhere the figure appears:
+
+1. the fix, held;
+2. a quick reset to the mistake, held;
+3. the fix, applied slowly, and held.
+
+The same file becomes the tip page's figure, its share image, its downloads and its 8-second video, so you draw it once.
+
+The motion follows Emil Kowalski's animation rules, installed in this project as `emil-design-eng`, `animate` and `review-animations`. Read `animate` once before your first figure.
 
 Read `reference.md` in this folder for the API and the patterns. The ten figures in `src/figures/` are the examples; open the one nearest your tip before you start.
 
@@ -29,8 +39,8 @@ One screen, a few parts. It must read at 240px wide, the size of a card on the h
 One line each, then build it:
 
 - **Interface:** what's on screen.
-- **Mistake (t = 0):** what's wrong, visibly.
-- **Fix (t = 1):** what's right. This is the rest pose: the thumbnail, the share image, the video's first and last frame.
+- **Mistake (t = 0):** what's wrong, visibly. It's held for two seconds, so it has to read on its own.
+- **Fix (t = 1):** what's right. This is the rest pose: the thumbnail, the share image, and the video's first and last frame.
 - **Measurement:** the annotation that says the rule: a dimension line with its value, a pair of gap markers, a dashed guide, a count. It changes with `t`.
 - **Accent:** the one thing in blue: the element the tip is about, and its measurement.
 
@@ -63,11 +73,11 @@ Run `bun run look <name>`. It builds the site, photographs `/lab/<name>` to `loo
 2. **The mistake is visibly wrong** and the fix visibly right, at 240px, without reading the labels.
 3. **The rule is measured.** An annotation shows the tip's value, and it changes from the mistake's value to the fix's.
 4. **One accent.** Blue marks the subject and its measurement. Nothing else is blue.
-5. **Halfway holds up.** The tour pauses at t = 0.5 for two seconds, so nothing overlaps or tangles there.
+5. **The change reads as one motion.** Parts move one after another (a 30–80ms stagger, in `t` terms a window of about 0.1–0.3 each), not all at once and not in a long queue. Nothing overlaps or tangles at t = 0.5.
 6. **Both themes.** Nothing vanishes or turns the wrong colour in the dark row.
 7. **It's the interface.** Real UI, front-on, rounded, no perspective, nothing decorative.
 
-Then open `/lab/<name>` in `bun run dev` and scrub it with the pointer, and watch one tour lap: rest, the mistake, halfway, the fix.
+Then open `/lab/<name>` in `bun run dev` and watch the live loop at least twice. Ask: can I tell what changed, and why the fix is better, without reading the tip? Watch it slowed down too: in DevTools, set the Animations panel to 25% or throttle the CPU.
 
 ## 6. Ship
 
@@ -83,6 +93,8 @@ Run `bun run render`. It renders the tip's four videos and share image into `pub
 | colouring several things blue | one subject; move the rest to `ink` or the default |
 | setting a colour, fill or stroke width in code | use the classes in `reference.md` |
 | writing a timer, `requestAnimationFrame` or CSS animation | derive everything from `t`; the host animates `t` |
+| easing with your own curve, or none | `ease()` around every `phase`/`stagger`: Emil's strong ease-in-out for movement on screen |
+| growing something from nothing (`r: 0`, `w: 0`) | start it small and faded, e.g. scale from 0.6 with opacity, and let it grow |
 | a busy halfway frame | stagger parts with `phase`/`stagger`, or crossfade with `opacity` |
 | drawing outside the safe area | keep within x 24–376, y 32–288 |
 | a label in every corner | at most two labels, plus words that belong to the UI itself |

@@ -1,20 +1,72 @@
 ---
 import { SITE } from "../lib/site";
 const year = new Date().getFullYear();
+const THEMES = [
+  { value: "system", label: "System" },
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+] as const;
 ---
 
 <footer class="wrap">
   <div class="footer">
     <p class="muted">
-      © {year} <a href={SITE.authorUrl}>{SITE.author}</a>. Tips and figures are free to download for personal use.
+      © {year} <a href={SITE.authorUrl}>{SITE.author}</a>. Free to download for personal use.
     </p>
-    <nav class="mono muted links">
-      <a href="/rss.xml">RSS</a>
-      <a href={SITE.repo}>Source</a>
-      <a href={SITE.authorUrl}>praveenjuge.com</a>
-    </nav>
+    <div class="end">
+      <nav class="links" aria-label="Elsewhere">
+        <a href="/rss.xml">RSS</a>
+        <a href={SITE.repo}>Source</a>
+      </nav>
+      <div class="theme" role="group" aria-label="Theme">
+        {
+          THEMES.map(({ value, label }) => (
+            <button type="button" data-theme-value={value} aria-pressed="false" title={label}>
+              {value === "system" && (
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <rect x="2" y="3" width="12" height="8.5" rx="1.5" />
+                  <path d="M6 13.5h4" />
+                </svg>
+              )}
+              {value === "light" && (
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <circle cx="8" cy="8" r="2.75" />
+                  <path d="M8 1.75v1.5M8 12.75v1.5M1.75 8h1.5M12.75 8h1.5M3.6 3.6l1.05 1.05M11.35 11.35l1.05 1.05M3.6 12.4l1.05-1.05M11.35 4.65l1.05-1.05" />
+                </svg>
+              )}
+              {value === "dark" && (
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M13.2 9.7A5.5 5.5 0 0 1 6.3 2.8a5.5 5.5 0 1 0 6.9 6.9Z" />
+                </svg>
+              )}
+              <span class="visually-hidden">{label}</span>
+            </button>
+          ))
+        }
+      </div>
+    </div>
   </div>
 </footer>
+
+<script>
+  const root = document.documentElement;
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>("[data-theme-value]")];
+  const current = () => root.dataset.theme ?? "system";
+  const show = () => buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeValue === current())));
+  for (const button of buttons) {
+    button.addEventListener("click", () => {
+      const value = button.dataset.themeValue!;
+      if (value === "system") delete root.dataset.theme;
+      else root.dataset.theme = value;
+      try {
+        if (value === "system") localStorage.removeItem("theme");
+        else localStorage.setItem("theme", value);
+      } catch {}
+      show();
+    });
+  }
+  show();
+</script>
 
 <style>
   .footer {
@@ -22,18 +74,75 @@ const year = new Date().getFullYear();
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 12px 24px;
-    margin-top: 96px;
-    padding-top: 24px;
-    padding-bottom: 40px;
+    gap: 16px 24px;
+    margin-top: 112px;
+    padding: 24px 0 40px;
     border-top: 1px solid var(--line);
     font-size: 13px;
   }
-  .footer a:hover {
+  .footer p a {
     color: var(--ink);
+  }
+  .end {
+    display: flex;
+    align-items: center;
+    gap: 20px;
   }
   .links {
     display: flex;
     gap: 16px;
+    color: var(--muted);
+  }
+  .links a {
+    transition: color 150ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .links a:hover {
+      color: var(--ink);
+    }
+  }
+  .theme {
+    display: flex;
+    padding: 2px;
+    gap: 2px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  .theme button {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition:
+      color 150ms ease,
+      background-color 150ms ease,
+      transform 160ms var(--ease-out);
+  }
+  .theme button:active {
+    transform: scale(0.94);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .theme button:hover {
+      color: var(--ink);
+    }
+  }
+  .theme button[aria-pressed="true"] {
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .theme svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 </style>

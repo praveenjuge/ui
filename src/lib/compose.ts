@@ -21,8 +21,9 @@ export interface Words {
   body: string;
 }
 
-const SANS = '"Geist Variable", ui-sans-serif, system-ui, sans-serif';
-const MONO = '"Geist Mono Variable", ui-monospace, Menlo, monospace';
+/** The system fonts, as the site uses them; a canvas skips the ui-* families, so the named ones follow. */
+const SANS = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+const MONO = 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace';
 /** The figure's 5:4 stage, and the band of it a drawing stays inside, so the words can sit close. */
 const STAGE = VIEW.height / VIEW.width;
 const INK_TOP = SAFE.y / VIEW.height;
@@ -68,7 +69,7 @@ export async function compose(options: {
   const colors = palette(theme);
 
   await Promise.all(
-    [`560 ${spec.title}px ${SANS}`, `400 ${spec.body}px ${SANS}`, `400 ${spec.credit}px ${MONO}`, `500 ${spec.credit}px ${MONO}`].map(
+    [`600 ${spec.title}px ${SANS}`, `400 ${spec.body}px ${SANS}`, `400 ${spec.credit}px ${MONO}`, `500 ${spec.credit}px ${MONO}`].map(
       (font) => document.fonts.load(font, words.title + words.body + pad(words.number)),
     ),
   );
@@ -129,9 +130,9 @@ function layoutText(ctx: CanvasRenderingContext2D, words: Words, spec: Spec, wid
     const title = Math.round(spec.title * scale);
     const body = Math.round(spec.body * scale);
     const lines: Line[] = [];
-    const titleFont = `560 ${title}px ${SANS}`;
-    for (const text of balance(ctx, words.title, width, titleFont, -0.03 * title)) {
-      lines.push({ text, font: titleFont, color: "ink", leading: title * 1.12, after: 0, tracking: -0.03 * title });
+    const titleFont = `600 ${title}px ${SANS}`;
+    for (const text of balance(ctx, words.title, width, titleFont, -0.02 * title)) {
+      lines.push({ text, font: titleFont, color: "ink", leading: title * 1.12, after: 0, tracking: -0.02 * title });
     }
     lines[lines.length - 1]!.after = spec.gap * scale;
     const bodyFont = `400 ${body}px ${SANS}`;
@@ -286,7 +287,7 @@ export async function composeRest(figure: Figure, words: Words, size: Size, them
   stage.style.aspectRatio = "5 / 4";
   host.append(stage);
   document.body.append(host);
-  const mounted = mountFigure(stage, figure, { interactive: false });
+  const mounted = mountFigure(stage, figure, { play: false });
   try {
     return await compose({ svg: stage.querySelector("svg")!, words, size, theme });
   } finally {

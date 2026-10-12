@@ -2,11 +2,9 @@
 /**
  * A figure's proof sheet, for drawing one: /lab/<name>. It shows the
  * mistake, halfway and the fix in both themes, the rest pose at thumbnail
- * size, and a live copy to scrub. `bun run look <name>` photographs it and
+ * size, and the live loop. `bun run look <name>` photographs it and
  * checks it. Not for readers, and not in the sitemap.
  */
-import "@fontsource-variable/geist";
-import "@fontsource-variable/geist-mono";
 import "../../styles/global.css";
 
 export function getStaticPaths() {
@@ -52,7 +50,7 @@ const STATES = [
       </figure>
       <figure>
         <div class="stage" data-live></div>
-        <figcaption class="mono">live: move across, or wait for the tour</figcaption>
+        <figcaption class="mono">live: the 8s loop</figcaption>
       </figure>
     </section>
     <p class="mono" id="report"></p>
@@ -66,7 +64,7 @@ const STATES = [
       for (const stage of document.querySelectorAll<HTMLElement>(".stage")) {
         const live = stage.hasAttribute("data-live");
         const at = Number(stage.dataset.at ?? 1);
-        const { svg } = mountFigure(stage, figure, live ? { play: true } : { interactive: false, at });
+        const { svg } = mountFigure(stage, figure, live ? {} : { play: false, at });
         if (live) continue;
         const box = svg.getBBox();
         const inside =

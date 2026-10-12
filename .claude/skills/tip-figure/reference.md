@@ -20,13 +20,20 @@ The engine is `src/lib/figure/`: `index.ts` is what a figure imports, `draw.ts` 
 
 ## Motion
 
-- The host owns time. It moves `t` on a critically damped spring, from the pointer (x across the stage) or the tour (rest at 1, then 0, 0.5, 1 over 8 s). Your function only maps `t` to a picture, so the same `t` always draws the same frame. That's what makes the videos repeatable.
-- Never use timers, `requestAnimationFrame`, CSS transitions or randomness.
-- Give parts their own stretch of the scrub, so they move one after another rather than all at once:
+- **The host owns time.** It plays one 8-second lap on a loop, and the video is exactly one lap:
+  - hold the fix for 1.6 s;
+  - reset to the mistake in 0.5 s and hold it for 2.1 s;
+  - apply the fix over 1.5 s and hold it to the end.
+
+  `t` moves linearly in time between those holds. Your function only maps `t` to a picture, so the same `t` always draws the same frame. That's what makes the videos repeatable.
+- **Easing comes from you, per part.** Wrap every `phase(...)` or `stagger(...)` in `ease()`, Emil Kowalski's strong ease-in-out (`cubic-bezier(0.77, 0, 0.175, 1)`), the curve for movement on screen. The reset is fast and the fix is slow, so the eye stays on the fix.
+- **Stagger.** Give each part its own stretch of `t` so they move one after another. Over the 1.5 s fix, a window of 0.1–0.3 per part is the 30–80 ms stagger Emil's rules ask for.
   - `phase(t, a, b)` is 0 before `a`, 1 after `b`, and linear between them.
   - `stagger(t, i, n, overlap)` is part `i` of `n`'s overlapping window.
-  - Wrap either in `ease()` for a soft start and landing.
-- Swap discrete things, such as a label's words or a class, at a threshold. Crossfade with `opacity` around it so nothing pops.
+- **Nothing from nothing.** Never grow a shape from zero. Start it at about 60% of its size and faded, and grow it in.
+- **Words.** Swap a label's words at a threshold, and crossfade with `opacity` around it so nothing pops.
+- **No time of your own.** Never use timers, `requestAnimationFrame`, CSS transitions or randomness.
+- **Reduced motion.** The host holds the fix.
 
 ## `index.ts`
 

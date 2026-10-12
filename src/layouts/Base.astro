@@ -1,6 +1,4 @@
 ---
-import "@fontsource-variable/geist";
-import "@fontsource-variable/geist-mono";
 import "../styles/global.css";
 import Footer from "../components/Footer.astro";
 import { SITE } from "../lib/site";
@@ -54,35 +52,11 @@ const canonical = new URL(path, SITE.url).href;
         <span class="mark" aria-hidden="true"></span>
         <span>{SITE.title}</span>
       </a>
-      <nav class="tools">
-        <a href="/rss.xml" class="mono muted link">RSS</a>
-        <button type="button" class="theme mono" id="theme-toggle" aria-label="Switch between light and dark">
-          <span class="theme-label"></span>
-        </button>
-      </nav>
     </header>
     <main>
       <slot />
     </main>
     <Footer />
-    <script>
-      const root = document.documentElement;
-      const button = document.getElementById("theme-toggle")!;
-      const label = button.querySelector(".theme-label")!;
-      const isDark = () =>
-        root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-      const show = () => (label.textContent = isDark() ? "Dark" : "Light");
-      button.addEventListener("click", () => {
-        const next = isDark() ? "light" : "dark";
-        root.dataset.theme = next;
-        try {
-          localStorage.setItem("theme", next);
-        } catch {}
-        show();
-      });
-      matchMedia("(prefers-color-scheme: dark)").addEventListener("change", show);
-      show();
-    </script>
   </body>
 </html>
 
@@ -90,49 +64,27 @@ const canonical = new URL(path, SITE.url).href;
   .header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    height: 72px;
+    height: 64px;
   }
   .brand {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    font-weight: 560;
+    font-weight: 600;
     letter-spacing: -0.01em;
   }
   .mark {
-    width: 18px;
-    height: 18px;
-    border: 1px solid var(--ink);
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--ink);
     border-radius: 5px;
     position: relative;
   }
   .mark::after {
     content: "";
     position: absolute;
-    inset: 5px;
+    inset: 3.5px;
     border-radius: 50%;
     background: var(--accent);
-  }
-  .tools {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .link:hover {
-    color: var(--ink);
-  }
-  .theme {
-    height: 30px;
-    min-width: 64px;
-    padding: 0 12px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: transparent;
-    cursor: pointer;
-  }
-  .theme:hover {
-    border-color: var(--muted);
   }
 </style>

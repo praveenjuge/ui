@@ -1,7 +1,7 @@
 ---
 import Figure from "./Figure.astro";
-import TipText from "./TipText.astro";
 import { CATEGORIES } from "../lib/categories";
+import { pad } from "../lib/media";
 import type { Tip } from "../lib/tips";
 
 interface Props {
@@ -14,29 +14,50 @@ const search = [title, body, CATEGORIES[category]].join(" ").toLowerCase();
 ---
 
 <a href={`/${number}`} class="card" data-category={category} data-search={search}>
-  <Figure figure={figure} lazy class="card-figure" />
-  <div class="card-text">
-    <TipText tip={tip} heading="h2" />
+  <div class="plate">
+    <Figure figure={figure} lazy />
   </div>
+  <p class="meta"><span class="number">{pad(number)}</span>{CATEGORIES[category]}</p>
+  <h2 class="title">{title}</h2>
 </a>
 
 <style>
   .card {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    overflow: hidden;
-    background: var(--bg);
-    transition: border-color 200ms ease;
-  }
-  .card:hover {
-    border-color: var(--muted);
+    display: grid;
+    gap: 6px;
+    align-content: start;
   }
   .card[hidden] {
     display: none;
   }
-  .card-text {
-    padding: 4px 18px 20px;
+  .plate {
+    margin-bottom: 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 150ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover .plate {
+      border-color: var(--line-strong);
+    }
+  }
+  .meta {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .number {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
 </style>

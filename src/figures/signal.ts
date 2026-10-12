@@ -28,8 +28,8 @@ export default defineFigure({
     d.path({ d: points(A), cls: "accent" });
     const plain = d.path({ d: points(B) });
     const dashed = d.path({ d: points(B), cls: "guide ink" });
-    const dots = XS.map((x, i) => d.circle({ cx: x, cy: A[i]!, r: 0, cls: "fill accent" }));
-    const squares = XS.map((x, i) => d.box({ x, y: B[i]!, w: 0, h: 0, r: 1, cls: "plate ink" }));
+    const dots = XS.map((x, i) => d.circle({ cx: x, cy: A[i]!, r: 3.5, cls: "fill accent" }));
+    const squares = XS.map((x, i) => d.box({ x, y: B[i]!, w: 7, h: 7, r: 1, cls: "plate ink" }));
     const nameA = d.label({ x: 296, y: A[4]!, text: "2026", anchor: "start" });
     const nameB = d.label({ x: 296, y: B[4]!, text: "2025", anchor: "start", cls: "ink" });
 
@@ -41,9 +41,11 @@ export default defineFigure({
       plainKey.set({ opacity: 1 - line });
       dashed.set({ opacity: line });
       dashedKey.set({ opacity: line });
-      dots.forEach((dot) => dot.set({ r: 3.5 * marks }));
+      // Markers grow in from 60% of their size as they fade in, never from nothing.
+      const grow = 0.6 + 0.4 * marks;
+      dots.forEach((dot) => dot.set({ r: 3.5 * grow, opacity: marks }));
       squares.forEach((sq, i) => {
-        const s = 7 * marks;
+        const s = 7 * grow;
         sq.set({ x: XS[i]! - s / 2, y: B[i]! - s / 2, w: s, h: s, opacity: marks });
       });
       nameA.set({ opacity: names });

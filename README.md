@@ -49,14 +49,11 @@ Every push to `main` deploys. Workers Builds (Cloudflare's Git integration, conn
 
 ## How the figures work
 
-A figure is a flat wireframe in a 400 × 320 viewBox with one number, `t`: 0 is the mistake, 1 is the fix. It draws itself once with the kit in `src/lib/figure/draw.ts` and returns a function that shows it at any `t`. The host (`src/lib/figure/host.ts`) does everything else:
+A figure is a flat wireframe in a 400 × 320 viewBox with one number, `t`: 0 is the mistake, 1 is the fix. It draws itself once with the kit in `src/lib/figure/draw.ts`, and returns a function that shows it at any `t`.
 
-- the pointer scrubs `t` across the figure;
-- a spring smooths it;
-- an 8-second tour plays the lesson, and that tour is also the video;
-- one frame loop runs every figure on the page, sleeps off screen, and respects reduced motion.
+The host (`src/lib/figure/host.ts`) plays the lesson on a loop: the fix, a quick reset to the mistake, then the fix applied slowly. One frame loop runs every figure on the page and skips the ones off screen. Under reduced motion, figures hold the fix.
 
-Each figure is its own chunk, loaded only on pages that show it.
+The motion follows Emil Kowalski's animation rules. His skills (`emil-design-eng`, `animate`, `review-animations` and others, from [emilkowalski/skills](https://github.com/emilkowalski/skills)) are installed in `.claude/skills`, with their versions in `skills-lock.json`.
 
 ## License
 
